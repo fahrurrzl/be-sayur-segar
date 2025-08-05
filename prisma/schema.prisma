@@ -39,6 +39,7 @@ model Seller {
     storeName     String    @map("store_name") @db.VarChar(255)
     storeLocation String    @map("store_location") @db.VarChar(255)
     verified      Boolean   @default(false)
+    bankName      String    @map("bank_name") @db.VarChar(255)
     bankAccount   String    @map("bank_account") @db.VarChar(255)
     products      Product[]
     createdAt     DateTime  @default(now())

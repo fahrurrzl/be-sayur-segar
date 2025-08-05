@@ -11,7 +11,6 @@ export const registerSchema = z
       .string()
       .min(8, { message: "Password must be at least 8 characters" }),
     confirmPassword: z.string(),
-    role: z.enum(["buyer", "seller"]),
     address: z.string().nonempty({ message: "Address is required" }),
   })
   .refine((data) => data.password === data.confirmPassword, {

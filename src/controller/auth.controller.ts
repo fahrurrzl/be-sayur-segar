@@ -8,7 +8,7 @@ import { generateToken } from "../utils/jwt";
 
 export default {
   async register(req: Request, res: Response) {
-    const { name, email, address, phone, role, password, confirmPassword } =
+    const { name, email, address, phone, password, confirmPassword } =
       req.body as unknown as TRegister;
 
     try {
@@ -17,7 +17,6 @@ export default {
         email,
         address,
         phone,
-        role,
         password,
         confirmPassword,
       });
@@ -43,7 +42,6 @@ export default {
           phone: validated.phone,
           password: hashedPassword,
           address: validated.address,
-          role: validated.role,
         },
       });
 
