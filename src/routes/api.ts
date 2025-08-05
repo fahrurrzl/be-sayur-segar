@@ -1,7 +1,10 @@
 import express from "express";
-import dummyController from "../controller/dummy.controller";
 const router = express.Router();
 
-router.get("/", dummyController.dummy);
+router.get("/", (req, res) => {
+  res.status(200).json({
+    message: "Welcome to the API",
+  });
+});
 
 export default router;

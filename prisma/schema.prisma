@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum RoleUser {
+    buyer
+    seller
+    admin
+}
+
+model User {
+    id        String   @id @default(uuid())
+    name      String   @db.VarChar(255)
+    email     String   @unique
+    phone     String   @db.VarChar(15)
+    password  String   @db.Text
+    role      RoleUser @default(buyer)
+    address   String   @db.Text
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    Seller    Seller[]
+}
+
+model Seller {
+    id            String    @id @default(uuid())
+    user          User      @relation(fields: [userId], references: [id])
+    userId        String    @map("user_id")
+    storeName     String    @map("store_name") @db.VarChar(255)
+    storeLocation String    @map("store_location") @db.VarChar(255)
+    verified      Boolean   @default(false)
+    bankAccount   String    @map("bank_account") @db.VarChar(255)
+    products      Product[]
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
+}
+
+enum Category {
+    sayurandaun
+    sayuranakar
+    sayuranbuah
+    bumbudapur
+    sayuranorganik
+    herbs
+}
+
+model Product {
+    id          String   @id @default(uuid())
+    seller      Seller?  @relation(fields: [sellerId], references: [id])
+    sellerId    String?  @map("seller_id")
+    name        String   @db.VarChar(255)
+    description String   @db.Text
+    price       BigInt   @db.BigInt
+    stock       Int
+    imageUrl    String   @db.Text
+    category    Category
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+}
