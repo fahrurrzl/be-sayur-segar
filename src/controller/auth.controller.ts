@@ -117,4 +117,30 @@ export default {
       }
     }
   },
+  async me(req: Request, res: Response) {
+    const user = req.user;
+
+    try {
+      const userExists = await prisma.user.findFirst({
+        where: {
+          email: user?.email,
+        },
+      });
+
+      if (!userExists) {
+        return res.status(400).json({
+          message: "User not match in our record",
+        });
+      }
+
+      return res.status(200).json({
+        message: "Success get user detail",
+        data: userExists,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  },
 };
