@@ -1,6 +1,8 @@
 import express from "express";
 import authController from "../controller/auth.controller";
 import authMiddleware from "../middleware/auth.middleware";
+import roleMiddleware from "../middleware/role.middleware";
+import { RoleUser } from "@prisma/client";
 const router = express.Router();
 
 router.post("/auth/register", authController.register);

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../../prisma/prisma";
 import bcrypt from "bcryptjs";
 import { loginSchema, registerSchema } from "../schema/auth.schema";
-import { TLogin, TRegister } from "../types/auth";
+import { IReqUser, TLogin, TRegister } from "../types/auth";
 import { z } from "zod";
 import { generateToken } from "../utils/jwt";
 
@@ -117,7 +117,7 @@ export default {
       }
     }
   },
-  async me(req: Request, res: Response) {
+  async me(req: IReqUser, res: Response) {
     const user = req.user;
 
     try {

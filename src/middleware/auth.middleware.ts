@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { getUser } from "../utils/jwt";
+import { IReqUser } from "../types/auth";
 
 export default function (req: Request, res: Response, next: NextFunction) {
   const authorization = req.headers.authorization;
@@ -27,7 +28,7 @@ export default function (req: Request, res: Response, next: NextFunction) {
       });
     }
 
-    req.user = user;
+    (req as IReqUser).user = user;
 
     next();
   } catch (error) {
