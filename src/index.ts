@@ -8,6 +8,12 @@ app.use(bodyParser.json());
 
 const PORT = 3000;
 
+router.get("/", (req, res) => {
+  res.status(200).json({
+    message: "Welcome to the API",
+  });
+});
+
 app.use("/api", router);
 
 app.listen(PORT, () => {

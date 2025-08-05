@@ -1,10 +1,8 @@
 import express from "express";
+import authController from "../controller/auth.controller";
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.status(200).json({
-    message: "Welcome to the API",
-  });
-});
+router.post("/auth/register", authController.register);
+router.post("/auth/login", authController.login);
 
 export default router;
