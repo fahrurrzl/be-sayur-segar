@@ -7,5 +7,5 @@ export const productSchema = z.object({
   price: z.number().nonnegative(),
   stock: z.number().min(1).nonnegative(),
   imageUrl: z.string().nonempty(),
-  category: z.enum(Category),
+  categoryId: z.string().nonempty({ message: "Please input category" }),
 });

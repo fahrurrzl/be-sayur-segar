@@ -8,7 +8,7 @@ import { z } from "zod";
 export default {
   async create(req: IReqUser, res: Response) {
     const user = req.user;
-    const { name, description, price, stock, imageUrl, category } =
+    const { name, description, price, stock, imageUrl, categoryId } =
       req.body as unknown as TProduct;
 
     try {
@@ -18,7 +18,7 @@ export default {
         price,
         stock,
         imageUrl,
-        category,
+        categoryId,
       });
 
       const seller = await prisma.seller.findFirst({
@@ -49,7 +49,7 @@ export default {
           price: Number(validated.price),
           stock: validated.stock,
           imageUrl: validated.imageUrl,
-          category: validated.category,
+          categoryId: validated.categoryId,
         },
       });
 
@@ -145,7 +145,7 @@ export default {
   async update(req: IReqUser, res: Response) {
     const user = req.user;
     const { id } = req.params;
-    const { name, description, price, stock, imageUrl, category } =
+    const { name, description, price, stock, imageUrl, categoryId } =
       req.body as unknown as TProduct;
 
     try {
@@ -155,7 +155,7 @@ export default {
         price,
         stock,
         imageUrl,
-        category,
+        categoryId,
       });
 
       const seller = await prisma.seller.findFirst({
@@ -201,6 +201,7 @@ export default {
           price: Number(validated.price),
           stock: validated.stock,
           imageUrl: validated.imageUrl,
+          categoryId: validated.categoryId,
         },
       });
 

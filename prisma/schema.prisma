@@ -17,6 +17,7 @@ enum RoleUser {
     buyer
     seller
     admin
+    superadmin
 }
 
 model User {
@@ -27,9 +28,10 @@ model User {
     password  String   @db.Text
     role      RoleUser @default(buyer)
     address   String   @db.Text
+    Seller    Seller[]
+    Category  Category[]
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    Seller    Seller[]
 }
 
 model Seller {
@@ -46,13 +48,15 @@ model Seller {
     updatedAt     DateTime  @updatedAt
 }
 
-enum Category {
-    sayuran_daun
-    sayuran_akar
-    sayuran_buah
-    bumbu_dapur
-    sayuran_organik
-    herbs
+model Category {
+    id          String   @id @default(uuid())
+    name        String   @db.VarChar(255)
+    imageUrl    String @db.Text
+    products    Product[]
+    createdBy   User     @relation(fields: [userId], references: [id])
+    userId      String @map("user_id")
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
 }
 
 model Product {
@@ -64,7 +68,8 @@ model Product {
     price       BigInt   @db.BigInt
     stock       Int
     imageUrl    String   @db.Text
-    category    Category
+    category    Category @relation(fields: [categoryId], references: [id])
+    categoryId  String   @map("category_id")
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
 }

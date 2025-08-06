@@ -5,10 +5,13 @@ import sellerController from "../controller/seller.controller";
 import productController from "../controller/product.controller";
 import { uploadSingle } from "../middleware/media.middleware";
 import mediaController from "../controller/media.controller";
+import categoryController from "../controller/category.controller";
+import roleMiddleware from "../middleware/role.middleware";
 const router = express.Router();
 
 router.post("/auth/register", authController.register);
 router.post("/auth/login", authController.login);
+router.post("/auth/login-admin", authController.loginAdmin);
 router.get("/auth/me", authMiddleware, authController.me);
 
 router.post("/seller", authMiddleware, sellerController.create);
@@ -30,4 +33,23 @@ router.post(
   mediaController.upload
 );
 router.delete("/media/delete", authMiddleware, mediaController.delete);
+
+router.post(
+  "/category",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  categoryController.create
+);
+router.get("/category", categoryController.index);
+router.get("/category/:id", categoryController.show);
+router.put(
+  "/category/:id",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  categoryController.update
+);
+router.delete(
+  "/category/:id",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  categoryController.delete
+);
+
 export default router;
