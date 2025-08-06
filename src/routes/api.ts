@@ -3,6 +3,8 @@ import authController from "../controller/auth.controller";
 import authMiddleware from "../middleware/auth.middleware";
 import sellerController from "../controller/seller.controller";
 import productController from "../controller/product.controller";
+import { uploadSingle } from "../middleware/media.middleware";
+import mediaController from "../controller/media.controller";
 const router = express.Router();
 
 router.post("/auth/register", authController.register);
@@ -21,4 +23,11 @@ router.get("/product", productController.index);
 router.get("/product/:id", productController.show);
 router.put("/product/:id", authMiddleware, productController.update);
 router.delete("/product/:id", authMiddleware, productController.delete);
+
+router.post(
+  "/media/upload",
+  [authMiddleware, uploadSingle("image")],
+  mediaController.upload
+);
+router.delete("/media/delete", authMiddleware, mediaController.delete);
 export default router;
