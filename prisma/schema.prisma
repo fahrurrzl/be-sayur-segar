@@ -47,11 +47,11 @@ model Seller {
 }
 
 enum Category {
-    sayurandaun
-    sayuranakar
-    sayuranbuah
-    bumbudapur
-    sayuranorganik
+    sayuran_daun
+    sayuran_akar
+    sayuran_buah
+    bumbu_dapur
+    sayuran_organik
     herbs
 }
 
