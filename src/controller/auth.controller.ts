@@ -47,7 +47,10 @@ export default {
 
       return res.status(201).json({
         message: "User created successfully",
-        data: user,
+        data: {
+          ...user,
+          password: undefined,
+        },
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -122,6 +125,9 @@ export default {
       const userExists = await prisma.user.findFirst({
         where: {
           email: user?.email,
+        },
+        include: {
+          Seller: true,
         },
       });
 
