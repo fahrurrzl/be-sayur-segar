@@ -19,6 +19,7 @@ model User {
   updatedAt DateTime   @updatedAt
   Category  Category[]
   Seller    Seller[]
+  Cart      Cart[]
 }
 
 model Seller {
@@ -47,18 +48,19 @@ model Category {
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  sellerId    String?  @map("seller_id")
-  name        String   @db.VarChar(255)
+  id          String     @id @default(uuid())
+  sellerId    String?    @map("seller_id")
+  name        String     @db.VarChar(255)
   description String
   price       Float
   stock       Int
   imageUrl    String
-  categoryId  String   @map("category_id")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  category    Category @relation(fields: [categoryId], references: [id])
-  seller      Seller?  @relation(fields: [sellerId], references: [id])
+  categoryId  String     @map("category_id")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  category    Category   @relation(fields: [categoryId], references: [id])
+  seller      Seller?    @relation(fields: [sellerId], references: [id])
+  cartItems   CartItem[]
 }
 
 enum RoleUser {
@@ -66,4 +68,25 @@ enum RoleUser {
   seller
   admin
   superadmin
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @map("user_id")
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String   @map("cart_id")
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  productId String   @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
