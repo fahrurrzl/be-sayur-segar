@@ -111,6 +111,9 @@ export default {
         where: {
           userId: user?.id,
         },
+        include: {
+          products: true,
+        },
       });
 
       if (!seller) {

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { Category } from "@prisma/client";
 
 export const productSchema = z.object({
   name: z.string().nonempty({ message: "Please input product name" }),
