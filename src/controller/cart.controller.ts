@@ -137,39 +137,44 @@ export default {
     }
   },
   destroy: async (req: IReqUser, res: Response) => {
-    const { id } = req.body;
+    const { itemId } = req.body;
     const user = req.user;
 
     try {
-      const cart = await prisma.cart.findFirst({
-        where: {
-          userId: user?.id,
-        },
-        include: {
-          items: true,
-        },
+      // 1️⃣ Ambil item + cart-nya untuk cek kepemilikan
+      const cartItem = await prisma.cartItem.findUnique({
+        where: { id: itemId },
+        include: { cart: true },
       });
 
-      if (!cart?.items.length) {
-        await prisma.cart.delete({
-          where: {
-            id: cart?.id,
-          },
+      if (!cartItem || cartItem.cart.userId !== user?.id) {
+        return res.status(404).json({
+          message: "Item not found in your cart",
         });
       }
 
-      const cartItem = await prisma.cartItem.delete({
-        where: {
-          id,
-        },
+      // 2️⃣ Hapus item
+      await prisma.cartItem.delete({
+        where: { id: itemId },
       });
+
+      // 3️⃣ Cek apakah cart masih punya item
+      const remainingItems = await prisma.cartItem.count({
+        where: { cartId: cartItem.cartId },
+      });
+
+      // 4️⃣ Kalau kosong → hapus cart
+      if (remainingItems === 0) {
+        await prisma.cart.delete({
+          where: { id: cartItem.cartId },
+        });
+      }
 
       return res.status(200).json({
         message: "Product removed from cart successfully",
-        data: cartItem,
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return res.status(500).json({
         message: "Internal server error",
       });
