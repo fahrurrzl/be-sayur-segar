@@ -106,7 +106,7 @@ export default {
   },
   async show(req: IReqUser, res: Response) {
     const { id } = req.params;
-    console.log("id => ", id);
+
     try {
       const product = await prisma.product.findUnique({
         where: {

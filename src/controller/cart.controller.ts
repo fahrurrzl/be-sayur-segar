@@ -43,12 +43,32 @@ export default {
             message: "Product updated in cart successfully",
             data: result,
           });
+        } else {
+          const result = await prisma.cartItem.create({
+            data: {
+              cartId: existingCart?.id as string,
+              productId,
+              quantity,
+              price,
+            },
+          });
+
+          return res.status(201).json({
+            message: "Product added to cart successfully",
+            data: result,
+          });
         }
       }
 
+      const cart = await prisma.cart.create({
+        data: {
+          userId: user?.id as string,
+        },
+      });
+
       const result = await prisma.cartItem.create({
         data: {
-          cartId: existingCart?.id as string,
+          cartId: cart.id,
           productId,
           quantity,
           price,
@@ -75,7 +95,26 @@ export default {
           userId: user?.id,
         },
         include: {
-          items: true,
+          _count: {
+            select: { items: true },
+          },
+          items: {
+            include: {
+              product: {
+                select: {
+                  name: true,
+                  stock: true,
+                  imageUrl: true,
+                  seller: {
+                    select: {
+                      storeName: true,
+                      storeLocation: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       });
 
