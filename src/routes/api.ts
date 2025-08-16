@@ -62,5 +62,7 @@ router.delete(
 router.post("/cart", authMiddleware, cartController.create);
 router.get("/cart", authMiddleware, cartController.index);
 router.delete("/cart", authMiddleware, cartController.destroy);
+router.put("/cart/increase", authMiddleware, cartController.increase);
+router.put("/cart/decrease", authMiddleware, cartController.decrease);
 
 export default router;
