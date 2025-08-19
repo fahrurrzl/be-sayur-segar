@@ -15,6 +15,7 @@ router.post("/auth/register", authController.register);
 router.post("/auth/login", authController.login);
 router.post("/auth/login-admin", authController.loginAdmin);
 router.get("/auth/me", authMiddleware, authController.me);
+router.put("/auth/update", authMiddleware, authController.update);
 
 // Seller
 router.post("/seller", authMiddleware, sellerController.create);

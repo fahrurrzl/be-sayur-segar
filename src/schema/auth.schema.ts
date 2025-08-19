@@ -24,3 +24,12 @@ export const loginSchema = z.object({
     .string()
     .min(8, { message: "Password must be at least 8 characters" }),
 });
+
+export const updateSchema = z.object({
+  name: z.string().min(3, { message: "Name must be at least 3 characters" }),
+  email: z.string().email({ message: "Invalid email address" }),
+  phone: z
+    .string()
+    .min(10, { message: "Phone number must be at least 10 characters" }),
+  address: z.string().nonempty({ message: "Address is required" }),
+});

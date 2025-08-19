@@ -113,6 +113,14 @@ export default {
         },
         include: {
           products: true,
+          user: {
+            select: {
+              name: true,
+              email: true,
+              phone: true,
+              address: true,
+            },
+          },
         },
       });
 

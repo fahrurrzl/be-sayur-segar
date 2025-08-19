@@ -1,8 +1,12 @@
 import { Request, Response } from "express";
 import { prisma } from "../../prisma/prisma";
 import bcrypt from "bcryptjs";
-import { loginSchema, registerSchema } from "../schema/auth.schema";
-import { IReqUser, TLogin, TRegister } from "../types/auth";
+import {
+  loginSchema,
+  registerSchema,
+  updateSchema,
+} from "../schema/auth.schema";
+import { IReqUser, TLogin, TRegister, TUpdate } from "../types/auth";
 import { z } from "zod";
 import { generateToken } from "../utils/jwt";
 
@@ -145,6 +149,58 @@ export default {
       return res.status(500).json({
         message: "Internal server error",
       });
+    }
+  },
+  async update(req: IReqUser, res: Response) {
+    const { name, email, phone, address } = req.body as unknown as TUpdate;
+    const user = req?.user;
+
+    try {
+      const validated = updateSchema.parse({
+        name,
+        email,
+        phone,
+        address,
+      });
+
+      const userExists = await prisma.user.findUnique({
+        where: {
+          id: user?.id,
+        },
+      });
+
+      if (!userExists) {
+        return res.status(400).json({
+          message: "User not match in our record",
+        });
+      }
+
+      const updatedUser = await prisma.user.update({
+        where: {
+          id: user?.id,
+        },
+        data: {
+          name: validated.name,
+          email: validated.email,
+          phone: validated.phone,
+          address: validated.address,
+        },
+      });
+
+      return res.status(200).json({
+        message: "User updated successfully",
+        data: updatedUser,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: error.issues[0].message,
+        });
+      } else {
+        return res.status(500).json({
+          message: "Internal server error",
+        });
+      }
     }
   },
   // login admin

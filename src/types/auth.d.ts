@@ -15,3 +15,10 @@ interface IReqUser extends Request {
     role: string;
   };
 }
+
+export type TUpdate = {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+};
