@@ -7,14 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum RoleUser {
+  user
+  admin
+  superadmin
+}
+
 model User {
   id        String     @id @default(uuid())
   name      String     @db.VarChar(255)
   email     String     @unique
   phone     String     @db.VarChar(15)
   password  String
-  role      RoleUser   @default(buyer)
+  role      RoleUser   @default(user)
   address   String
+  isActive  Boolean    @default(false)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   Category  Category[]
@@ -24,28 +31,56 @@ model User {
 }
 
 model Seller {
-  id            String    @id @default(uuid())
-  userId        String    @map("user_id")
-  storeName     String    @map("store_name") @db.VarChar(255)
-  storeLocation String    @map("store_location") @db.VarChar(255)
-  verified      Boolean   @default(false)
-  bankName      String    @map("bank_name") @db.VarChar(255)
-  bankAccount   String    @map("bank_account") @db.VarChar(255)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  products      Product[]
-  user          User      @relation(fields: [userId], references: [id])
-  Order         Order[]
+  id                  String                @id @default(uuid())
+  userId              String                @map("user_id")
+  storeName           String                @map("store_name") @db.VarChar(255)
+  storeLocation       String                @map("store_location") @db.VarChar(255)
+  verified            Boolean               @default(false)
+  description         String                @db.Text
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  products            Product[]
+  user                User                  @relation(fields: [userId], references: [id])
+  Order               Order[]
+  SellerPaymentMethod SellerPaymentMethod[]
+}
+
+enum PaymentType {
+  BANK
+  E_WALLET
+  COD
+  VIRTUAL_ACCOUNT
+}
+
+model PaymentMethod {
+  id                  String                @id @default(uuid())
+  name                String // "BCA Transfer", "COD", "OVO", "Dana"
+  type                PaymentType
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  SellerPaymentMethod SellerPaymentMethod[]
+}
+
+model SellerPaymentMethod {
+  id              String  @id @default(uuid())
+  sellerId        String
+  paymentMethodId String
+  accountName     String? // opsional kalau BANK/E-Wallet
+  accountNumber   String? // opsional kalau BANK/E-Wallet
+  isActive        Boolean @default(true)
+
+  seller        Seller        @relation(fields: [sellerId], references: [id])
+  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
 }
 
 model Category {
   id        String    @id @default(uuid())
   name      String    @db.VarChar(255)
   imageUrl  String
-  userId    String    @map("user_id")
+  createdBy String    @map("created_by")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  createdBy User      @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [createdBy], references: [id])
   products  Product[]
 }
 
@@ -53,7 +88,7 @@ model Product {
   id          String      @id @default(uuid())
   sellerId    String?     @map("seller_id")
   name        String      @db.VarChar(255)
-  description String
+  description String      @db.Text
   price       Float
   stock       Int
   imageUrl    String
@@ -64,13 +99,6 @@ model Product {
   seller      Seller?     @relation(fields: [sellerId], references: [id])
   cartItems   CartItem[]
   OrderItem   OrderItem[]
-}
-
-enum RoleUser {
-  buyer
-  seller
-  admin
-  superadmin
 }
 
 model Cart {
@@ -104,6 +132,7 @@ enum OrderStatus {
 
 model Order {
   id          String      @id @default(uuid())
+  orderId     String      @map("order_id")
   userId      String      @map("user_id")
   user        User        @relation(fields: [userId], references: [id])
   sellerId    String      @map("seller_id")

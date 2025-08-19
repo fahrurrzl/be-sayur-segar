@@ -79,7 +79,14 @@ export default {
 
       const userExists = await prisma.user.findFirst({
         where: {
-          email: validated.email,
+          AND: [
+            {
+              email: validated.email,
+            },
+            {
+              isActive: true,
+            },
+          ],
         },
       });
 

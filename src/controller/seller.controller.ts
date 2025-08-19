@@ -7,15 +7,14 @@ import { sellerSchema } from "../schema/seller.schema";
 
 export default {
   async create(req: IReqUser, res: Response) {
-    const { storeName, storeLocation, bankAccount, bankName } =
+    const { storeName, storeLocation, description } =
       req.body as unknown as TSeller;
 
     try {
       const validated = sellerSchema.parse({
         storeName,
         storeLocation,
-        bankName,
-        bankAccount,
+        description,
       });
       const sellerExists = await prisma.seller.findFirst({
         where: {
@@ -40,8 +39,7 @@ export default {
           userId: req.user?.id as string,
           storeName: validated.storeName,
           storeLocation: validated.storeLocation,
-          bankAccount: validated.bankAccount,
-          bankName: validated.bankName,
+          description: validated.description || "",
         },
       });
 
@@ -144,15 +142,14 @@ export default {
   },
   async update(req: IReqUser, res: Response) {
     const user = req.user;
-    const { storeName, storeLocation, bankAccount, bankName } =
+    const { storeName, storeLocation, description } =
       req.body as unknown as TSeller;
 
     try {
       const validated = sellerSchema.parse({
         storeName,
         storeLocation,
-        bankAccount,
-        bankName,
+        description,
       });
 
       const sellerExists = await prisma.seller.findFirst({
@@ -174,8 +171,7 @@ export default {
         data: {
           storeName: validated.storeName,
           storeLocation: validated.storeLocation,
-          bankAccount: validated.bankAccount,
-          bankName: validated.bankName,
+          description: validated.description,
         },
       });
 

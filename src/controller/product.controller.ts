@@ -117,6 +117,7 @@ export default {
             select: {
               storeName: true,
               storeLocation: true,
+              userId: true,
             },
           },
         },

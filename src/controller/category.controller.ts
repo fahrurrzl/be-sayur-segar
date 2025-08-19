@@ -27,7 +27,7 @@ export default {
         data: {
           name: validated.name,
           imageUrl: validated.imageUrl,
-          userId: user?.id,
+          createdBy: user?.id,
         },
       });
 
@@ -47,7 +47,7 @@ export default {
       const categories = await prisma.category.findMany({
         include: {
           products: true,
-          createdBy: true,
+          user: true,
         },
       });
 
@@ -72,7 +72,7 @@ export default {
         },
         include: {
           products: true,
-          createdBy: true,
+          user: true,
         },
       });
 

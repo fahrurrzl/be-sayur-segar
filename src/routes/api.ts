@@ -8,6 +8,9 @@ import mediaController from "../controller/media.controller";
 import categoryController from "../controller/category.controller";
 import roleMiddleware from "../middleware/role.middleware";
 import cartController from "../controller/cart.controller";
+import orderController from "../controller/order.controller";
+import paymentMethodController from "../controller/payment-method.controller";
+import { RoleUser } from "@prisma/client";
 const router = express.Router();
 
 // Auth
@@ -65,5 +68,30 @@ router.get("/cart", authMiddleware, cartController.index);
 router.delete("/cart", authMiddleware, cartController.destroy);
 router.put("/cart/increase", authMiddleware, cartController.increase);
 router.put("/cart/decrease", authMiddleware, cartController.decrease);
+
+// Order
+router.post("/order", authMiddleware, orderController.create);
+router.get("/order", authMiddleware, orderController.index);
+router.get("/order/seller", authMiddleware, orderController.sellerIndex);
+router.get("/order/user", authMiddleware, orderController.userIndex);
+
+// Payment Method
+router.post(
+  "/payment-method",
+  [authMiddleware, roleMiddleware([RoleUser.superadmin])],
+  paymentMethodController.create
+);
+router.get("/payment-method", paymentMethodController.index);
+router.get("/payment-method/:id", paymentMethodController.show);
+router.put(
+  "/payment-method/:id",
+  [authMiddleware, roleMiddleware([RoleUser.superadmin])],
+  paymentMethodController.update
+);
+router.delete(
+  "/payment-method/:id",
+  [authMiddleware, roleMiddleware([RoleUser.superadmin])],
+  paymentMethodController.destroy
+);
 
 export default router;
