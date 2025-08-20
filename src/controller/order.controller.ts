@@ -140,6 +140,9 @@ export default {
         include: {
           items: true,
         },
+        orderBy: {
+          createdAt: "desc",
+        },
       });
 
       res.status(200).json({
@@ -174,6 +177,10 @@ export default {
         },
         include: {
           items: true,
+          user: true,
+        },
+        orderBy: {
+          createdAt: "desc",
         },
       });
 
@@ -199,6 +206,10 @@ export default {
         },
         include: {
           items: true,
+          seller: true,
+        },
+        orderBy: {
+          createdAt: "desc",
         },
       });
 
