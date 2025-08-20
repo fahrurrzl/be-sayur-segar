@@ -30,11 +30,13 @@ export default {
   // Create Order
   async create(req: IReqUser, res: Response) {
     const user = req.user;
+    const { address } = req.body as unknown as TOrder;
 
     try {
       // validasi input user (hanya address)
-      const validated = checkoutSchema.parse(req.body);
-      const { address } = validated;
+      const validated = checkoutSchema.parse({
+        address,
+      });
 
       // Ambil cart user
       const cart = await prisma.cart.findFirst({
@@ -80,7 +82,7 @@ export default {
             sellerId,
             totalPrice,
             shippingFee,
-            address,
+            address: validated.address,
             status: "PENDING",
             items: {
               create: items.map((item) => ({
@@ -94,6 +96,11 @@ export default {
         });
 
         orders.push(order);
+
+        await prisma.wallet.update({
+          where: { sellerId: sellerId },
+          data: { balance: { increment: totalPrice } },
+        });
       }
 
       // update product stock

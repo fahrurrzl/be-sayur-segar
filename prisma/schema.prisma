@@ -31,46 +31,40 @@ model User {
 }
 
 model Seller {
-  id                  String                @id @default(uuid())
-  userId              String                @map("user_id")
-  storeName           String                @map("store_name") @db.VarChar(255)
-  storeLocation       String                @map("store_location") @db.VarChar(255)
-  verified            Boolean               @default(false)
-  description         String                @db.Text
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  products            Product[]
-  user                User                  @relation(fields: [userId], references: [id])
-  Order               Order[]
-  SellerPaymentMethod SellerPaymentMethod[]
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
+  storeName     String    @map("store_name") @db.VarChar(255)
+  storeLocation String    @map("store_location") @db.VarChar(255)
+  verified      Boolean   @default(false)
+  description   String    @db.Text
+  bankName      String
+  accountName   String
+  accountNumber String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  products      Product[]
+  user          User      @relation(fields: [userId], references: [id])
+  Order         Order[]
+  wallet        Wallet?
 }
 
-enum PaymentType {
-  BANK
-  E_WALLET
-  COD
-  VIRTUAL_ACCOUNT
+model Wallet {
+  id           String              @id @default(uuid())
+  sellerId     String              @unique
+  balance      Float               @default(0) // saldo sementara
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  seller       Seller              @relation(fields: [sellerId], references: [id])
+  transactions WalletTransaction[]
 }
 
-model PaymentMethod {
-  id                  String                @id @default(uuid())
-  name                String // "BCA Transfer", "COD", "OVO", "Dana"
-  type                PaymentType
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  SellerPaymentMethod SellerPaymentMethod[]
-}
-
-model SellerPaymentMethod {
-  id              String  @id @default(uuid())
-  sellerId        String
-  paymentMethodId String
-  accountName     String? // opsional kalau BANK/E-Wallet
-  accountNumber   String? // opsional kalau BANK/E-Wallet
-  isActive        Boolean @default(true)
-
-  seller        Seller        @relation(fields: [sellerId], references: [id])
-  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+model WalletTransaction {
+  id        String   @id @default(uuid())
+  walletId  String
+  amount    Float
+  type      String // "CREDIT" (dari order) / "DEBIT" (withdraw)
+  createdAt DateTime @default(now())
+  wallet    Wallet   @relation(fields: [walletId], references: [id])
 }
 
 model Category {

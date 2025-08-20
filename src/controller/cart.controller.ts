@@ -109,6 +109,9 @@ export default {
                     select: {
                       storeName: true,
                       storeLocation: true,
+                      bankName: true,
+                      accountName: true,
+                      accountNumber: true,
                     },
                   },
                 },

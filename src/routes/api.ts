@@ -9,8 +9,7 @@ import categoryController from "../controller/category.controller";
 import roleMiddleware from "../middleware/role.middleware";
 import cartController from "../controller/cart.controller";
 import orderController from "../controller/order.controller";
-import paymentMethodController from "../controller/payment-method.controller";
-import { RoleUser } from "@prisma/client";
+import walletController from "../controller/wallet.controller";
 const router = express.Router();
 
 // Auth
@@ -75,23 +74,7 @@ router.get("/order", authMiddleware, orderController.index);
 router.get("/order/seller", authMiddleware, orderController.sellerIndex);
 router.get("/order/user", authMiddleware, orderController.userIndex);
 
-// Payment Method
-router.post(
-  "/payment-method",
-  [authMiddleware, roleMiddleware([RoleUser.superadmin])],
-  paymentMethodController.create
-);
-router.get("/payment-method", paymentMethodController.index);
-router.get("/payment-method/:id", paymentMethodController.show);
-router.put(
-  "/payment-method/:id",
-  [authMiddleware, roleMiddleware([RoleUser.superadmin])],
-  paymentMethodController.update
-);
-router.delete(
-  "/payment-method/:id",
-  [authMiddleware, roleMiddleware([RoleUser.superadmin])],
-  paymentMethodController.destroy
-);
+// Wallet
+router.post("/wallet", authMiddleware, walletController.create);
 
 export default router;

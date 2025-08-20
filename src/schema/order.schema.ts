@@ -20,7 +20,7 @@ export const orderSchema = z.object({
     .nonempty({ message: "Order must have at least 1 item" }),
 });
 
-// khusus checkout (user cuma kirim address)
+// khusus checkout (user kirim address dan sellerPaymentMethodId)
 export const checkoutSchema = z.object({
   address: z.string().nonempty({ message: "Address is required" }),
 });
