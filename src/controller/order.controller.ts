@@ -73,6 +73,7 @@ export default {
             shippingFee,
             address: validated.address,
             status: "PENDING",
+            payment_method: "",
             items: {
               create: items.map((item) => ({
                 productId: item.product.id,
@@ -94,8 +95,8 @@ export default {
           amount: grandTotal,
           payerEmail: user?.email!,
           description: `Pembayaran ${orders.length} order`,
-          successRedirectUrl: `${process.env.FRONTEND_URL}/orders/success`,
-          failureRedirectUrl: `${process.env.FRONTEND_URL}/orders/failed`,
+          successRedirectUrl: `${process.env.FRONTEND_URL}/order/success`,
+          failureRedirectUrl: `${process.env.FRONTEND_URL}/order/failed`,
           currency: "IDR",
         },
       });
@@ -138,7 +139,7 @@ export default {
   // webhook xendit
   async webhook(req: IReqUser, res: Response) {
     try {
-      const { id: invoiceId, status } = req.body;
+      const { id: invoiceId, status, payment_method } = req.body;
 
       if (status === "PAID") {
         // 1. Ambil semua order yang pakai invoice ini
@@ -155,7 +156,7 @@ export default {
         // 2. Update semua order jadi PAID
         await prisma.order.updateMany({
           where: { invoiceId },
-          data: { status: "PAID" },
+          data: { status: "PAID", payment_method },
         });
 
         // 3. Distribusi saldo per seller
@@ -267,6 +268,76 @@ export default {
       });
     } catch (error) {
       console.log("error => ", error);
+      return res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  },
+  // Get Order By ID
+  async show(req: IReqUser, res: Response) {
+    const { id } = req.params;
+    try {
+      const order = await prisma.order.findUnique({
+        where: { id },
+        include: {
+          items: true,
+          seller: true,
+          user: true,
+        },
+      });
+
+      if (!order) {
+        return res.status(404).json({
+          message: "Order not found",
+        });
+      }
+
+      res.status(200).json({
+        message: "Order fetched successfully",
+        data: order,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  },
+  // Get Order By invoiceId
+  async showByInvoiceId(req: IReqUser, res: Response) {
+    const user = req.user;
+    const { invoiceId } = req.params;
+    try {
+      const order = await prisma.order.findFirst({
+        where: {
+          AND: [
+            {
+              userId: user?.id,
+            },
+            {
+              invoiceId,
+            },
+          ],
+        },
+        include: {
+          items: true,
+          seller: true,
+          user: true,
+        },
+      });
+
+      if (!order) {
+        return res.status(404).json({
+          message: "Order not found",
+        });
+      }
+
+      res.status(200).json({
+        message: "Order fetched successfully",
+        data: order,
+      });
+    } catch (error) {
+      console.log(error);
       return res.status(500).json({
         message: "Internal server error",
       });

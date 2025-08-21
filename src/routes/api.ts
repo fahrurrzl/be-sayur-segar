@@ -74,6 +74,12 @@ router.post("/order/webhook", orderController.webhook);
 router.get("/order", authMiddleware, orderController.index);
 router.get("/order/seller", authMiddleware, orderController.sellerIndex);
 router.get("/order/user", authMiddleware, orderController.userIndex);
+router.get("/order/:id", authMiddleware, orderController.show);
+router.get(
+  "/order/invoice/:id",
+  authMiddleware,
+  orderController.showByInvoiceId
+);
 
 // Wallet
 router.post("/wallet", authMiddleware, walletController.create);

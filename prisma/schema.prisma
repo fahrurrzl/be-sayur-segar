@@ -126,21 +126,22 @@ enum OrderStatus {
 }
 
 model Order {
-  id          String      @id @default(uuid())
-  orderId     String      @unique @map("order_id")
-  userId      String      @map("user_id")
-  user        User        @relation(fields: [userId], references: [id])
-  sellerId    String      @map("seller_id")
-  seller      Seller      @relation(fields: [sellerId], references: [id])
-  totalPrice  Float
-  shippingFee Float
-  status      OrderStatus @default(PENDING)
-  address     String
-  invoiceId   String?     @map("invoice_id") // Xendit invoice ID
-  paymentUrl  String?     @map("payment_url") // Xendit payment URL
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  items       OrderItem[]
+  id             String      @id @default(uuid())
+  orderId        String      @unique @map("order_id")
+  userId         String      @map("user_id")
+  user           User        @relation(fields: [userId], references: [id])
+  sellerId       String      @map("seller_id")
+  seller         Seller      @relation(fields: [sellerId], references: [id])
+  totalPrice     Float
+  shippingFee    Float
+  status         OrderStatus @default(PENDING)
+  address        String
+  invoiceId      String?     @map("invoice_id") // Xendit invoice ID
+  paymentUrl     String?     @map("payment_url") // Xendit payment URL
+  payment_method String?     @map("payment_method")
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  items          OrderItem[]
 }
 
 model OrderItem {
