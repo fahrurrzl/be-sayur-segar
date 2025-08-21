@@ -80,7 +80,9 @@ router.get(
   authMiddleware,
   orderController.showByInvoiceId
 );
-
+router.put("/order/process/:id", authMiddleware, orderController.isProcess);
+router.put("/order/delivered/:id", authMiddleware, orderController.isDelivered);
+router.put("/order/completed/:id", authMiddleware, orderController.isCompleted);
 // Wallet
 router.post("/wallet", authMiddleware, walletController.create);
 

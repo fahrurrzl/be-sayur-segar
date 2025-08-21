@@ -117,12 +117,12 @@ model CartItem {
 }
 
 enum OrderStatus {
-  PENDING // belum bayar
-  PAID // sudah dibayar
-  FAILED // pembayaran gagal
-  PROCESSING // seller packing
-  DELIVERED // sudah diterima kurir
-  COMPLETED // user konfirmasi selesai
+  PENDING
+  PAID
+  FAILED
+  PROCESSING
+  DELIVERED
+  COMPLETED
 }
 
 model Order {

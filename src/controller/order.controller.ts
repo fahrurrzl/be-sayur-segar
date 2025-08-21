@@ -280,7 +280,16 @@ export default {
       const order = await prisma.order.findUnique({
         where: { id },
         include: {
-          items: true,
+          items: {
+            include: {
+              product: {
+                select: {
+                  name: true,
+                  imageUrl: true,
+                },
+              },
+            },
+          },
           seller: true,
           user: true,
         },
@@ -334,6 +343,96 @@ export default {
 
       res.status(200).json({
         message: "Order fetched successfully",
+        data: order,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  },
+  // is processing
+  async isProcess(req: IReqUser, res: Response) {
+    const { id } = req.params;
+    try {
+      const order = await prisma.order.update({
+        where: {
+          id,
+        },
+        data: {
+          status: "PROCESSING",
+        },
+      });
+
+      if (!order) {
+        return res.status(404).json({
+          message: "Order not found",
+        });
+      }
+
+      res.status(200).json({
+        message: "Order updated successfully",
+        data: order,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  },
+  // is delivered
+  async isDelivered(req: IReqUser, res: Response) {
+    const { id } = req.params;
+    try {
+      const order = await prisma.order.update({
+        where: {
+          id,
+        },
+        data: {
+          status: "DELIVERED",
+        },
+      });
+
+      if (!order) {
+        return res.status(404).json({
+          message: "Order not found",
+        });
+      }
+
+      res.status(200).json({
+        message: "Order updated successfully",
+        data: order,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  },
+  // is completed
+  async isCompleted(req: IReqUser, res: Response) {
+    const { id } = req.params;
+    try {
+      const order = await prisma.order.update({
+        where: {
+          id,
+        },
+        data: {
+          status: "COMPLETED",
+        },
+      });
+
+      if (!order) {
+        return res.status(404).json({
+          message: "Order not found",
+        });
+      }
+
+      res.status(200).json({
+        message: "Order updated successfully",
         data: order,
       });
     } catch (error) {
