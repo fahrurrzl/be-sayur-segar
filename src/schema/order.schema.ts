@@ -18,7 +18,7 @@ export const orderSchema = z.object({
   items: z
     .array(orderItemSchema)
     .nonempty({ message: "Order must have at least 1 item" }),
-  paymentUrl: z.string().optional(),
+  paymentUrl: z.string().nullable().optional(),
 });
 
 // khusus checkout (user kirim address dan sellerPaymentMethodId)

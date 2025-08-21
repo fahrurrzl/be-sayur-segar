@@ -3,28 +3,12 @@ import { IReqUser } from "../types/auth";
 import { Response } from "express";
 import { checkoutSchema } from "../schema/order.schema";
 import { prisma } from "../../prisma/prisma";
-import { TOrder } from "../types/order";
+import { TOrder, OrderWithItems } from "../types/order";
 import { Invoice } from "../utils/xendit";
+import { generateOrderId } from "../utils/randomString";
 
 async function calculateShippingFee(sellerId: string, userAddress: string) {
   return 20000;
-}
-
-function generateOrderId(): string {
-  const prefix = "ORD";
-
-  // ambil tanggal hari ini (YYYYMMDD)
-  const now = new Date();
-  const date = [
-    now.getFullYear(),
-    String(now.getMonth() + 1).padStart(2, "0"),
-    String(now.getDate()).padStart(2, "0"),
-  ].join("");
-
-  // random 5 digit alfanumerik
-  const random = Math.random().toString(36).substring(2, 7).toUpperCase();
-
-  return `${prefix}${date}${random}`;
 }
 
 export default {
@@ -65,8 +49,11 @@ export default {
         itemsBySeller[sellerId].push(item);
       }
 
-      // Buat order per seller
-      const orders: TOrder[] = [];
+      // Hitung total seluruh order
+      let grandTotal = 0;
+      const orders: OrderWithItems[] = [];
+
+      // Buat order PENDING (belum ada invoiceId)
       for (const [sellerId, items] of Object.entries(itemsBySeller)) {
         const subtotal = items.reduce(
           (acc, item) => acc + item.product.price * item.quantity,
@@ -75,11 +62,11 @@ export default {
 
         const shippingFee = await calculateShippingFee(sellerId, address);
         const totalPrice = subtotal + shippingFee;
+        grandTotal += totalPrice;
 
-        // 1. Buat order PENDING
         const order = await prisma.order.create({
           data: {
-            orderId: generateOrderId(),
+            orderId: generateOrderId("ORD"),
             userId: user?.id as string,
             sellerId,
             totalPrice,
@@ -97,29 +84,30 @@ export default {
           include: { items: true },
         });
 
-        // 2. Buat invoice di Xendit
-        const invoice = await Invoice.createInvoice({
-          data: {
-            externalId: order.orderId,
-            amount: totalPrice,
-            payerEmail: user?.email!,
-            description: `Pembayaran Order ${order.orderId}`,
-            successRedirectUrl: `${process.env.FRONTEND_URL}/orders/success`,
-            failureRedirectUrl: `${process.env.FRONTEND_URL}/orders/failed`,
-            currency: "IDR",
-            // opsi tambahan:
-            // paymentMethods: ['QRIS', 'ID_DANA'], // jika mau batasi metodenya
-          },
-        });
-
-        // 3. Simpan invoiceId & URL ke DB
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { invoiceId: invoice.id, paymentUrl: invoice.invoiceUrl },
-        });
-
-        orders.push({ ...order, paymentUrl: invoice.invoiceUrl });
+        orders.push(order);
       }
+
+      // 1x buat invoice gabungan di Xendit
+      const invoice = await Invoice.createInvoice({
+        data: {
+          externalId: generateOrderId("INV"),
+          amount: grandTotal,
+          payerEmail: user?.email!,
+          description: `Pembayaran ${orders.length} order`,
+          successRedirectUrl: `${process.env.FRONTEND_URL}/orders/success`,
+          failureRedirectUrl: `${process.env.FRONTEND_URL}/orders/failed`,
+          currency: "IDR",
+        },
+      });
+
+      // Update semua order dengan invoice yang sama
+      await prisma.order.updateMany({
+        where: { id: { in: orders.map((o) => o.id) } },
+        data: {
+          invoiceId: invoice.id,
+          paymentUrl: invoice.invoiceUrl,
+        },
+      });
 
       // kosongkan cart
       await prisma.cartItem.deleteMany({
@@ -127,8 +115,12 @@ export default {
       });
 
       res.status(201).json({
-        message: "Order created successfully",
-        data: orders,
+        message: "Orders created successfully with single invoice",
+        data: orders.map((o) => ({
+          ...o,
+          invoiceId: invoice.id,
+          paymentUrl: invoice.invoiceUrl,
+        })),
       });
     } catch (error) {
       console.log(error);
@@ -146,30 +138,40 @@ export default {
   // webhook xendit
   async webhook(req: IReqUser, res: Response) {
     try {
-      const { external_id, status } = req.body;
+      const { id: invoiceId, status } = req.body;
 
       if (status === "PAID") {
-        const order = await prisma.order.update({
-          where: { orderId: external_id },
+        // 1. Ambil semua order yang pakai invoice ini
+        const orders = await prisma.order.findMany({
+          where: { invoiceId },
+          include: { seller: true, items: true },
+        });
+
+        if (orders.length === 0) {
+          console.log("No orders found for invoice:", invoiceId);
+          return res.status(404).json({ message: "Orders not found" });
+        }
+
+        // 2. Update semua order jadi PAID
+        await prisma.order.updateMany({
+          where: { invoiceId },
           data: { status: "PAID" },
-          include: {
-            seller: true,
-            items: true,
-          },
         });
 
-        // Tambah saldo seller
-        await prisma.wallet.update({
-          where: { sellerId: order.sellerId },
-          data: { balance: { increment: order.totalPrice } },
-        });
-
-        // Kurangi stok produk
-        for (const item of order.items) {
-          await prisma.product.update({
-            where: { id: item.productId },
-            data: { stock: { decrement: item.quantity } },
+        // 3. Distribusi saldo per seller
+        for (const order of orders) {
+          await prisma.wallet.update({
+            where: { sellerId: order.sellerId },
+            data: { balance: { increment: order.totalPrice } },
           });
+
+          // 4. Kurangi stok produk sesuai item di order
+          for (const item of order.items) {
+            await prisma.product.update({
+              where: { id: item.productId },
+              data: { stock: { decrement: item.quantity } },
+            });
+          }
         }
       }
 
