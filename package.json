@@ -30,6 +30,7 @@
     "save-dev": "^0.0.1-security",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.4.5",
+    "xendit-node": "^7.0.0",
     "zod": "^4.0.14"
   },
   "devDependencies": {

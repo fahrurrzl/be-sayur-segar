@@ -117,16 +117,17 @@ model CartItem {
 }
 
 enum OrderStatus {
-  PENDING
-  PAID
-  SHIPPED
-  COMPLETED
-  CANCELED
+  PENDING // belum bayar
+  PAID // sudah dibayar
+  FAILED // pembayaran gagal
+  PROCESSING // seller packing
+  DELIVERED // sudah diterima kurir
+  COMPLETED // user konfirmasi selesai
 }
 
 model Order {
   id          String      @id @default(uuid())
-  orderId     String      @map("order_id")
+  orderId     String      @unique @map("order_id")
   userId      String      @map("user_id")
   user        User        @relation(fields: [userId], references: [id])
   sellerId    String      @map("seller_id")
@@ -135,6 +136,8 @@ model Order {
   shippingFee Float
   status      OrderStatus @default(PENDING)
   address     String
+  invoiceId   String?     @map("invoice_id") // Xendit invoice ID
+  paymentUrl  String?     @map("payment_url") // Xendit payment URL
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   items       OrderItem[]

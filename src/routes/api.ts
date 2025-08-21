@@ -70,6 +70,7 @@ router.put("/cart/decrease", authMiddleware, cartController.decrease);
 
 // Order
 router.post("/order", authMiddleware, orderController.create);
+router.post("/order/webhook", orderController.webhook);
 router.get("/order", authMiddleware, orderController.index);
 router.get("/order/seller", authMiddleware, orderController.sellerIndex);
 router.get("/order/user", authMiddleware, orderController.userIndex);

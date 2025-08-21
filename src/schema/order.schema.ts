@@ -13,11 +13,12 @@ export const orderSchema = z.object({
   shippingFee: z.number().min(0, { message: "Shipping fee must be >= 0" }),
   totalPrice: z.number().min(0, { message: "Total price must be >= 0" }),
   status: z
-    .enum(["PENDING", "PAID", "SHIPPED", "COMPLETED", "CANCELED"])
+    .enum(["PENDING", "PAID", "FAILED", "PROCESSING", "DELIVERED", "COMPLETED"])
     .default("PENDING"),
   items: z
     .array(orderItemSchema)
     .nonempty({ message: "Order must have at least 1 item" }),
+  paymentUrl: z.string().optional(),
 });
 
 // khusus checkout (user kirim address dan sellerPaymentMethodId)

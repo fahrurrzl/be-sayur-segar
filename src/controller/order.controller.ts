@@ -4,6 +4,7 @@ import { Response } from "express";
 import { checkoutSchema } from "../schema/order.schema";
 import { prisma } from "../../prisma/prisma";
 import { TOrder } from "../types/order";
+import { Invoice } from "../utils/xendit";
 
 async function calculateShippingFee(sellerId: string, userAddress: string) {
   return 20000;
@@ -75,6 +76,7 @@ export default {
         const shippingFee = await calculateShippingFee(sellerId, address);
         const totalPrice = subtotal + shippingFee;
 
+        // 1. Buat order PENDING
         const order = await prisma.order.create({
           data: {
             orderId: generateOrderId(),
@@ -95,20 +97,28 @@ export default {
           include: { items: true },
         });
 
-        orders.push(order);
-
-        await prisma.wallet.update({
-          where: { sellerId: sellerId },
-          data: { balance: { increment: totalPrice } },
+        // 2. Buat invoice di Xendit
+        const invoice = await Invoice.createInvoice({
+          data: {
+            externalId: order.orderId,
+            amount: totalPrice,
+            payerEmail: user?.email!,
+            description: `Pembayaran Order ${order.orderId}`,
+            successRedirectUrl: `${process.env.FRONTEND_URL}/orders/success`,
+            failureRedirectUrl: `${process.env.FRONTEND_URL}/orders/failed`,
+            currency: "IDR",
+            // opsi tambahan:
+            // paymentMethods: ['QRIS', 'ID_DANA'], // jika mau batasi metodenya
+          },
         });
-      }
 
-      // update product stock
-      for (const item of cart.items) {
-        await prisma.product.update({
-          where: { id: item.productId },
-          data: { stock: item.product.stock - item.quantity },
+        // 3. Simpan invoiceId & URL ke DB
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { invoiceId: invoice.id, paymentUrl: invoice.invoiceUrl },
         });
+
+        orders.push({ ...order, paymentUrl: invoice.invoiceUrl });
       }
 
       // kosongkan cart
@@ -131,6 +141,42 @@ export default {
       return res.status(500).json({
         message: "Internal server error",
       });
+    }
+  },
+  // webhook xendit
+  async webhook(req: IReqUser, res: Response) {
+    try {
+      const { external_id, status } = req.body;
+
+      if (status === "PAID") {
+        const order = await prisma.order.update({
+          where: { orderId: external_id },
+          data: { status: "PAID" },
+          include: {
+            seller: true,
+            items: true,
+          },
+        });
+
+        // Tambah saldo seller
+        await prisma.wallet.update({
+          where: { sellerId: order.sellerId },
+          data: { balance: { increment: order.totalPrice } },
+        });
+
+        // Kurangi stok produk
+        for (const item of order.items) {
+          await prisma.product.update({
+            where: { id: item.productId },
+            data: { stock: { decrement: item.quantity } },
+          });
+        }
+      }
+
+      res.status(200).json({ message: "ok" });
+    } catch (err) {
+      console.log("Webhook error: ", err);
+      res.status(500).json({ message: "internal error" });
     }
   },
   // Get All Order
