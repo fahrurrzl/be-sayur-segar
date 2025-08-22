@@ -49,6 +49,9 @@ export default {
           products: true,
           user: true,
         },
+        orderBy: {
+          createdAt: "desc",
+        },
       });
 
       res.status(200).json({
