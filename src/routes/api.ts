@@ -26,6 +26,16 @@ router.get("/seller/me", authMiddleware, sellerController.me);
 router.put("/seller", authMiddleware, sellerController.update);
 router.get("/seller/:id", sellerController.show);
 router.delete("/seller", authMiddleware, sellerController.delete);
+router.delete(
+  "/seller/:id",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  sellerController.adminDeleteSeller
+);
+router.put(
+  "/seller/verify/:id",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  sellerController.verifySeller
+);
 
 // Product
 router.post("/product", authMiddleware, productController.create);

@@ -74,7 +74,15 @@ export default {
   },
   async index(req: IReqUser, res: Response) {
     try {
-      const sellers = await prisma.seller.findMany();
+      const sellers = await prisma.seller.findMany({
+        include: {
+          products: true,
+          user: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
       res.status(200).json({
         message: "Sellers fetched successfully",
         data: sellers,
@@ -93,6 +101,10 @@ export default {
       const seller = await prisma.seller.findUnique({
         where: {
           id,
+        },
+        include: {
+          products: true,
+          user: true,
         },
       });
 
@@ -236,6 +248,63 @@ export default {
       res.status(200).json({
         message: "Seller deleted successfully",
         data: seller,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Internal server error",
+        data: null,
+      });
+    }
+  },
+  async adminDeleteSeller(req: IReqUser, res: Response) {
+    const { id } = req.params;
+
+    try {
+      const seller = await prisma.seller.delete({
+        where: {
+          id: id,
+        },
+      });
+
+      res.status(200).json({
+        message: "Seller deleted successfully",
+        data: seller,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Internal server error",
+        data: null,
+      });
+    }
+  },
+  async verifySeller(req: IReqUser, res: Response) {
+    const { id } = req.params;
+
+    try {
+      const seller = await prisma.seller.findUnique({
+        where: {
+          id: id,
+        },
+      });
+
+      if (!seller) {
+        return res.status(404).json({
+          message: "Seller not found",
+        });
+      }
+
+      const updatedSeller = await prisma.seller.update({
+        where: {
+          id: id,
+        },
+        data: {
+          verified: true,
+        },
+      });
+
+      res.status(200).json({
+        message: "Seller verified successfully",
+        data: updatedSeller,
       });
     } catch (error) {
       res.status(500).json({
