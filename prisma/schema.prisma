@@ -43,7 +43,7 @@ model Seller {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   products      Product[]
-  user          User      @relation(fields: [userId], references: [id])
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   Order         Order[]
   wallet        Wallet?
 }
@@ -51,10 +51,10 @@ model Seller {
 model Wallet {
   id           String              @id @default(uuid())
   sellerId     String              @unique
-  balance      Float               @default(0) // saldo sementara
+  balance      Float               @default(0)
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
-  seller       Seller              @relation(fields: [sellerId], references: [id])
+  seller       Seller              @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   transactions WalletTransaction[]
 }
 
@@ -62,9 +62,9 @@ model WalletTransaction {
   id        String   @id @default(uuid())
   walletId  String
   amount    Float
-  type      String // "CREDIT" (dari order) / "DEBIT" (withdraw)
+  type      String
   createdAt DateTime @default(now())
-  wallet    Wallet   @relation(fields: [walletId], references: [id])
+  wallet    Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
 }
 
 model Category {
@@ -74,7 +74,7 @@ model Category {
   createdBy String    @map("created_by")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  user      User      @relation(fields: [createdBy], references: [id])
+  user      User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
   products  Product[]
 }
 
@@ -89,8 +89,8 @@ model Product {
   categoryId  String      @map("category_id")
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  category    Category    @relation(fields: [categoryId], references: [id])
-  seller      Seller?     @relation(fields: [sellerId], references: [id])
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  seller      Seller?     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   cartItems   CartItem[]
   OrderItem   OrderItem[]
 }
@@ -98,7 +98,7 @@ model Product {
 model Cart {
   id        String     @id @default(uuid())
   userId    String     @map("user_id")
-  user      User       @relation(fields: [userId], references: [id])
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   items     CartItem[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -107,9 +107,9 @@ model Cart {
 model CartItem {
   id        String   @id @default(uuid())
   cartId    String   @map("cart_id")
-  cart      Cart     @relation(fields: [cartId], references: [id])
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
   productId String   @map("product_id")
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity  Int
   price     Float
   createdAt DateTime @default(now())
@@ -129,15 +129,15 @@ model Order {
   id             String      @id @default(uuid())
   orderId        String      @unique @map("order_id")
   userId         String      @map("user_id")
-  user           User        @relation(fields: [userId], references: [id])
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   sellerId       String      @map("seller_id")
-  seller         Seller      @relation(fields: [sellerId], references: [id])
+  seller         Seller      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   totalPrice     Float
   shippingFee    Float
   status         OrderStatus @default(PENDING)
   address        String
-  invoiceId      String?     @map("invoice_id") // Xendit invoice ID
-  paymentUrl     String?     @map("payment_url") // Xendit payment URL
+  invoiceId      String?     @map("invoice_id")
+  paymentUrl     String?     @map("payment_url")
   payment_method String?     @map("payment_method")
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -147,9 +147,9 @@ model Order {
 model OrderItem {
   id        String   @id @default(uuid())
   orderId   String   @map("order_id")
-  order     Order    @relation(fields: [orderId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId String   @map("product_id")
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity  Int
   price     Float
   createdAt DateTime @default(now())

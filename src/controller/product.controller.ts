@@ -74,8 +74,20 @@ export default {
     }
   },
   async index(req: IReqUser, res: Response) {
+    const { search, category } = req.query;
     try {
       const products = await prisma.product.findMany({
+        where: {
+          ...(search
+            ? {
+                name: {
+                  contains: search as string,
+                  mode: "insensitive",
+                },
+              }
+            : {}),
+          ...(category ? { categoryId: category as string } : {}),
+        },
         include: {
           seller: {
             select: {
@@ -86,16 +98,11 @@ export default {
         },
       });
 
-      const productsWithPrice = products.map((product) => {
-        return {
-          ...product,
-          price: Number(product.price),
-        };
-      });
+     
 
       res.status(200).json({
         message: "Products fetched successfully",
-        data: productsWithPrice,
+        data: products,
       });
     } catch (error) {
       console.log(error);
