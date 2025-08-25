@@ -134,7 +134,14 @@ export default {
           userId: user?.id,
         },
         include: {
-          products: true,
+          products: {
+            include: {
+              category: true,
+            },
+            orderBy: {
+              updatedAt: "desc",
+            }
+          },
           user: {
             select: {
               name: true,
