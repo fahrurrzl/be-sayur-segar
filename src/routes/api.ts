@@ -10,6 +10,7 @@ import roleMiddleware from "../middleware/role.middleware";
 import cartController from "../controller/cart.controller";
 import orderController from "../controller/order.controller";
 import walletController from "../controller/wallet.controller";
+import walletTransactionController from "../controller/wallet-transaction.controller";
 const router = express.Router();
 
 // Auth
@@ -95,5 +96,12 @@ router.put("/order/delivered/:id", authMiddleware, orderController.isDelivered);
 router.put("/order/completed/:id", authMiddleware, orderController.isCompleted);
 // Wallet
 router.post("/wallet", authMiddleware, walletController.create);
+
+// Wallet Transaction
+router.get(
+  "/wallet/transaction",
+  authMiddleware,
+  walletTransactionController.index
+);
 
 export default router;

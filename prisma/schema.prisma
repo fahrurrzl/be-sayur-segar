@@ -2,8 +2,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -58,13 +62,27 @@ model Wallet {
   transactions WalletTransaction[]
 }
 
+enum WalletTransactionStatus {
+  pending
+  success
+  failed
+}
+
+enum WalletTransactionType {
+  income
+  outcome
+}
+
 model WalletTransaction {
-  id        String   @id @default(uuid())
-  walletId  String
-  amount    Float
-  type      String
-  createdAt DateTime @default(now())
-  wallet    Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  id            String   @id @default(uuid())
+  walletId      String
+  amount        Float
+  type          WalletTransactionType
+  status        WalletTransactionStatus
+  paymentMethod String
+  orderId       String?  @map("order_id")
+  createdAt     DateTime @default(now())
+  wallet        Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
 }
 
 model Category {

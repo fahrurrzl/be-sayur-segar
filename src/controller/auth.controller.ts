@@ -138,7 +138,18 @@ export default {
           email: user?.email,
         },
         include: {
-          Seller: true,
+          Seller: {
+            select: {
+              storeName: true,
+              storeLocation: true,
+              verified: true,
+              bankName: true,
+              accountName: true,
+              accountNumber: true,
+              description: true,
+              wallet: true,
+            }
+          },
         },
       });
 

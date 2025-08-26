@@ -6,9 +6,10 @@ import { prisma } from "../../prisma/prisma";
 import { TOrder, OrderWithItems } from "../types/order";
 import { Invoice } from "../utils/xendit";
 import { generateOrderId } from "../utils/randomString";
+import { WalletTransactionStatus, WalletTransactionType } from "@prisma/client";
 
 async function calculateShippingFee(sellerId: string, userAddress: string) {
-  return 20000;
+  return 10000;
 }
 
 export default {
@@ -161,10 +162,22 @@ export default {
 
         // 3. Distribusi saldo per seller
         for (const order of orders) {
-          await prisma.wallet.update({
+          const wallet = await prisma.wallet.update({
             where: { sellerId: order.sellerId },
             data: { balance: { increment: order.totalPrice } },
           });
+
+          // Buat wallet tranaction
+          await prisma.walletTransaction.create({
+            data: {
+              orderId: order.orderId,
+              walletId: wallet.id,
+              amount: order.totalPrice,
+              type: WalletTransactionType.income,
+              paymentMethod: payment_method,
+              status: WalletTransactionStatus.success,
+            }
+          })
 
           // 4. Kurangi stok produk sesuai item di order
           for (const item of order.items) {
