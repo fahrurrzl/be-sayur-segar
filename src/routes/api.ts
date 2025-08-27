@@ -11,6 +11,7 @@ import cartController from "../controller/cart.controller";
 import orderController from "../controller/order.controller";
 import walletController from "../controller/wallet.controller";
 import walletTransactionController from "../controller/wallet-transaction.controller";
+import transferController from "../controller/transfer.controller";
 const router = express.Router();
 
 // Auth
@@ -118,5 +119,13 @@ router.get(
   [authMiddleware, roleMiddleware(["superadmin"])],
   walletTransactionController.show
 );
+
+// Payout
+router.post(
+  "/transfer",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  transferController.create
+);
+router.post("/transfer/webhook", transferController.payoutWebhook);
 
 export default router;

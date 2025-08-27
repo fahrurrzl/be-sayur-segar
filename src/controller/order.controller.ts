@@ -176,8 +176,8 @@ export default {
               type: WalletTransactionType.income,
               paymentMethod: payment_method,
               status: WalletTransactionStatus.success,
-            }
-          })
+            },
+          });
 
           // 4. Kurangi stok produk sesuai item di order
           for (const item of order.items) {
