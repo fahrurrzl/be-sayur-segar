@@ -140,6 +140,7 @@ export default {
         include: {
           Seller: {
             select: {
+              id: true,
               storeName: true,
               storeLocation: true,
               verified: true,
@@ -148,7 +149,7 @@ export default {
               accountNumber: true,
               description: true,
               wallet: true,
-            }
+            },
           },
         },
       });

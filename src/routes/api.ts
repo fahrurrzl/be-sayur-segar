@@ -99,9 +99,24 @@ router.post("/wallet", authMiddleware, walletController.create);
 
 // Wallet Transaction
 router.get(
+  "/wallet/transaction/superadmin",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  walletTransactionController.superAdminIndex
+);
+router.get(
   "/wallet/transaction",
   authMiddleware,
   walletTransactionController.index
+);
+router.post(
+  "/wallet/transaction",
+  authMiddleware,
+  walletTransactionController.create
+);
+router.get(
+  "/wallet/transaction/:id",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  walletTransactionController.show
 );
 
 export default router;

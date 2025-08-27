@@ -140,7 +140,7 @@ export default {
             },
             orderBy: {
               updatedAt: "desc",
-            }
+            },
           },
           user: {
             select: {
@@ -173,14 +173,23 @@ export default {
   },
   async update(req: IReqUser, res: Response) {
     const user = req.user;
-    const { storeName, storeLocation, description } =
-      req.body as unknown as TSeller;
+    const {
+      storeName,
+      storeLocation,
+      description,
+      bankName,
+      accountName,
+      accountNumber,
+    } = req.body as unknown as TSeller;
 
     try {
       const validated = sellerSchema.parse({
         storeName,
         storeLocation,
         description,
+        bankName,
+        accountName,
+        accountNumber,
       });
 
       const sellerExists = await prisma.seller.findFirst({
@@ -203,6 +212,9 @@ export default {
           storeName: validated.storeName,
           storeLocation: validated.storeLocation,
           description: validated.description,
+          bankName: validated.bankName,
+          accountName: validated.accountName,
+          accountNumber: validated.accountNumber,
         },
       });
 
