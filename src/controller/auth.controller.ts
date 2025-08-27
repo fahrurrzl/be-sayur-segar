@@ -162,7 +162,10 @@ export default {
 
       return res.status(200).json({
         message: "Success get user detail",
-        data: userExists,
+        data: {
+          ...userExists,
+          password: undefined,
+        },
       });
     } catch (error) {
       return res.status(500).json({
@@ -208,7 +211,10 @@ export default {
 
       return res.status(200).json({
         message: "User updated successfully",
-        data: updatedUser,
+        data: {
+          ...updatedUser,
+          password: undefined,
+        },
       });
     } catch (error) {
       if (error instanceof z.ZodError) {

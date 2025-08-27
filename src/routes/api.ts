@@ -119,6 +119,11 @@ router.get(
   [authMiddleware, roleMiddleware(["superadmin"])],
   walletTransactionController.show
 );
+router.delete(
+  "/wallet/transaction/:id",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  walletTransactionController.destroy
+);
 
 // Payout
 router.post(

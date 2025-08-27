@@ -61,7 +61,7 @@ export default {
       });
     } catch (error) {
       console.log(error);
-      res.status(500).json({ message: "internal error" });
+      res.status(500).json({ message: "internal server error" });
     }
   },
   async superAdminIndex(req: IReqUser, res: Response) {
@@ -100,7 +100,7 @@ export default {
       });
     } catch (error) {
       console.log(error);
-      res.status(500).json({ message: "internal error" });
+      res.status(500).json({ message: "internal server error" });
     }
   },
   async show(req: IReqUser, res: Response) {
@@ -202,7 +202,37 @@ export default {
       });
     } catch (error) {
       console.log(error);
-      res.status(500).json({ message: error });
+      res.status(500).json({ message: "internal server error" });
+    }
+  },
+  async destroy(req: IReqUser, res: Response) {
+    const { id } = req.params;
+    try {
+      const walletTransaction = await prisma.walletTransaction.findUnique({
+        where: {
+          id,
+        },
+      });
+
+      if (!walletTransaction) {
+        return res.status(404).json({
+          message: "wallet transaction not found",
+        });
+      }
+
+      const result = await prisma.walletTransaction.delete({
+        where: {
+          id,
+        },
+      });
+
+      res.status(200).json({
+        message: "success delete wallet transaction",
+        data: result,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "internal server error" });
     }
   },
 };
