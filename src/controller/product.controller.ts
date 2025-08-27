@@ -82,7 +82,6 @@ export default {
             ? {
                 name: {
                   contains: search as string,
-                  // mode: "insensitive",
                 },
               }
             : {}),
@@ -95,10 +94,12 @@ export default {
               storeLocation: true,
             },
           },
+          category: true,
+        },
+        orderBy: {
+          createdAt: "desc",
         },
       });
-
-     
 
       res.status(200).json({
         message: "Products fetched successfully",
@@ -261,6 +262,41 @@ export default {
           message: "You are not authorized to delete this product",
         });
       }
+
+      if (!product) {
+        return res.status(404).json({
+          message: "Product not match in our record",
+        });
+      }
+
+      const deletedProduct = await prisma.product.delete({
+        where: {
+          id,
+        },
+      });
+
+      res.status(200).json({
+        message: "Product deleted successfully",
+        data: {
+          ...deletedProduct,
+          price: Number(deletedProduct.price),
+        },
+      });
+    } catch (error) {
+      console.log("error => ", error);
+      return res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  },
+  async adminDelete(req: IReqUser, res: Response) {
+    const { id } = req.params;
+    try {
+      const product = await prisma.product.findUnique({
+        where: {
+          id,
+        },
+      });
 
       if (!product) {
         return res.status(404).json({

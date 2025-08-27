@@ -45,6 +45,11 @@ router.get("/product", productController.index);
 router.get("/product/:id", productController.show);
 router.put("/product/:id", authMiddleware, productController.update);
 router.delete("/product/:id", authMiddleware, productController.delete);
+router.delete(
+  "/product/admin/:id",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  productController.adminDelete
+);
 
 // Media
 router.post(
