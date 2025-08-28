@@ -16,6 +16,8 @@ import {
 } from "../types/auth";
 import { z } from "zod";
 import { generateToken } from "../utils/jwt";
+import { renderMailHtml, sendMail } from "../utils/mail/mail";
+import env from "../utils/env";
 
 export default {
   async register(req: Request, res: Response) {
@@ -45,6 +47,7 @@ export default {
       }
 
       const hashedPassword = await bcrypt.hash(validated.password, 10);
+      const activationCode = await bcrypt.hash(validated.email, 10);
 
       const user = await prisma.user.create({
         data: {
@@ -53,7 +56,23 @@ export default {
           phone: validated.phone,
           password: hashedPassword,
           address: validated.address,
+          activationCode,
         },
+      });
+
+      // mail
+      const contentMail = await renderMailHtml("registration-success.ejs", {
+        name: user?.name,
+        email: user?.email,
+        createdAt: user?.createdAt,
+        activationLink: `${env.FRONTEND_URL}/auth/activation?code=${user.activationCode}`,
+      });
+
+      await sendMail({
+        from: env.EMAIL_SMTP_USER,
+        to: user?.email,
+        subject: "Aktivasi akun Anda",
+        html: contentMail as string,
       });
 
       return res.status(201).json({
@@ -64,6 +83,7 @@ export default {
         },
       });
     } catch (error) {
+      console.log(error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           message: error.issues[0].message,
@@ -356,6 +376,33 @@ export default {
           message: "Internal server error",
         });
       }
+    }
+  },
+  async activation(req: IReqUser, res: Response) {
+    const { code } = req.body as { code: string };
+
+    try {
+      const user = await prisma.user.update({
+        where: {
+          activationCode: code,
+        },
+        data: {
+          isActive: true,
+        },
+      });
+
+      return res.status(200).json({
+        message: "User activated successfully",
+        data: {
+          ...user,
+          password: undefined,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        message: "Internal server error",
+      });
     }
   },
 };

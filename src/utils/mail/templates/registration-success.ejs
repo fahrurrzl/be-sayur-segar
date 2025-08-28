@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACARA Activation User</title>
+  </head>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 600px;
+      margin: 2px auto;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border: 5px;
+      overflow: hidden;
+    }
+    .header {
+      background-color: #4caf50;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }
+    .content {
+      padding: 20px;
+    }
+    .footer {
+      background-color: #f1f1f1;
+      color: #555;
+      padding: 10px;
+      text-align: center;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 20px 0;
+      color: #fff;
+      background-color: #4caf50;
+      text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+      }
+    }
+  </style>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Selamat Datang!</h1>
+      </div>
+      <div class="content">
+        <p>Hello🖐️ <%= name %>,</p>
+        <p>Selamat datang di SayurSegar!</p>
+        <p>
+          Terima kasih telah bergabung di layanan kami. Berikut adalah informasi
+          dari akun Anda:
+        </p>
+        <ul>
+          <li><strong>Name: </strong><%= name %></li>
+          <li><strong>Email: </strong><%= email %></li>
+          <li><strong>Tanggal Pendaftaran: </strong><%= createdAt %></li>
+        </ul>
+        <p>Untuk memuali, silahkan click tombol dibawah ini:</p>
+        <a href="<%= activationLink %>" class="button">Aktifkan Akun</a>
+        <p>
+          Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami.
+        </p>
+        <p>Salam hangat, dari tim SayurSegar💖</p>
+      </div>
+      <div class="footer">
+        <p>&copy; 2025 SayurSegar. Semua HAK cipta Dilindungi</p>
+      </div>
+    </div>
+  </body>
+</html>

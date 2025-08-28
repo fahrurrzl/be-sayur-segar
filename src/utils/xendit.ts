@@ -1,7 +1,8 @@
 import Xendit from "xendit-node";
+import env from "./env";
 
 const x = new Xendit({
-  secretKey: process.env.XENDIT_SECRET_API_KEY!, // ambil dari dashboard
+  secretKey: env.XENDIT_SECRET_API_KEY,
 });
 
 export const Invoice = x.Invoice;

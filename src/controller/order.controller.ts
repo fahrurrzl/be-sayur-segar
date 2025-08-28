@@ -7,6 +7,7 @@ import { TOrder, OrderWithItems } from "../types/order";
 import { Invoice } from "../utils/xendit";
 import { generateOrderId } from "../utils/randomString";
 import { WalletTransactionStatus, WalletTransactionType } from "@prisma/client";
+import env from "../utils/env";
 
 async function calculateShippingFee(sellerId: string, userAddress: string) {
   return 10000;
@@ -96,8 +97,8 @@ export default {
           amount: grandTotal,
           payerEmail: user?.email!,
           description: `Pembayaran ${orders.length} order`,
-          successRedirectUrl: `${process.env.FRONTEND_URL}/order/success`,
-          failureRedirectUrl: `${process.env.FRONTEND_URL}/order/failed`,
+          successRedirectUrl: `${env.FRONTEND_URL}/order/success`,
+          failureRedirectUrl: `${env.FRONTEND_URL}/order/failed`,
           currency: "IDR",
         },
       });

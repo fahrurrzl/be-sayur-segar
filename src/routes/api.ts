@@ -12,6 +12,7 @@ import orderController from "../controller/order.controller";
 import walletController from "../controller/wallet.controller";
 import walletTransactionController from "../controller/wallet-transaction.controller";
 import transferController from "../controller/transfer.controller";
+import { sendMail } from "../utils/mail/mail";
 const router = express.Router();
 
 // Auth
@@ -25,6 +26,7 @@ router.put(
   authMiddleware,
   authController.changePassword
 );
+router.post("/auth/activation", authController.activation);
 
 // Seller
 router.post("/seller", authMiddleware, sellerController.create);
