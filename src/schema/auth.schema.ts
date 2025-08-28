@@ -33,3 +33,12 @@ export const updateSchema = z.object({
     .min(10, { message: "Phone number must be at least 10 characters" }),
   address: z.string().nonempty({ message: "Address is required" }),
 });
+
+export const changePasswordSchema = z.object({
+  oldPassword: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" }),
+  newPassword: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" }),
+});

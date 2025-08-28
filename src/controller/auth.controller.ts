@@ -2,11 +2,18 @@ import { Request, Response } from "express";
 import { prisma } from "../../prisma/prisma";
 import bcrypt from "bcryptjs";
 import {
+  changePasswordSchema,
   loginSchema,
   registerSchema,
   updateSchema,
 } from "../schema/auth.schema";
-import { IReqUser, TLogin, TRegister, TUpdate } from "../types/auth";
+import {
+  IReqUser,
+  TChangePassword,
+  TLogin,
+  TRegister,
+  TUpdate,
+} from "../types/auth";
 import { z } from "zod";
 import { generateToken } from "../utils/jwt";
 
@@ -278,6 +285,66 @@ export default {
       res.status(200).json({
         message: "Login success",
         data: token,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: error.issues[0].message,
+        });
+      } else {
+        return res.status(500).json({
+          message: "Internal server error",
+        });
+      }
+    }
+  },
+  // change password
+  async changePassword(req: IReqUser, res: Response) {
+    const { oldPassword, newPassword } = req.body as unknown as TChangePassword;
+    const user = req?.user;
+
+    try {
+      const validated = changePasswordSchema.parse({
+        oldPassword,
+        newPassword,
+      });
+
+      const userExists = await prisma.user.findUnique({
+        where: {
+          id: user?.id,
+        },
+      });
+
+      if (!userExists) {
+        return res.status(400).json({
+          message: "User not match in our record",
+        });
+      }
+
+      const isPasswordMatch = await bcrypt.compare(
+        validated.oldPassword,
+        userExists.password
+      );
+
+      if (!isPasswordMatch) {
+        return res.status(400).json({
+          message: "Password lama Anda tidak sesuai",
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(validated.newPassword, 10);
+
+      await prisma.user.update({
+        where: {
+          id: user?.id,
+        },
+        data: {
+          password: hashedPassword,
+        },
+      });
+
+      res.status(200).json({
+        message: "Password updated successfully",
       });
     } catch (error) {
       if (error instanceof z.ZodError) {

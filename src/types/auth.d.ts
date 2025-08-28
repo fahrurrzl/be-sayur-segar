@@ -22,3 +22,8 @@ export type TUpdate = {
   phone: string;
   address: string;
 };
+
+export type TChangePassword = {
+  oldPassword: string;
+  newPassword: string;
+};
