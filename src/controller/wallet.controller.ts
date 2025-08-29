@@ -2,6 +2,7 @@ import { Response } from "express";
 import { IReqUser } from "../types/auth";
 import { prisma } from "../../prisma/prisma";
 import { Prisma } from "@prisma/client";
+import { Balance } from "../utils/xendit";
 
 export default {
   async create(req: IReqUser, res: Response) {
@@ -53,6 +54,23 @@ export default {
 
       console.error("Wallet create error:", error);
       return res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  },
+  async index(req: IReqUser, res: Response) {
+    try {
+      const balance = await Balance.getBalance({
+        currency: "IDR",
+      });
+
+      return res.status(200).json({
+        message: "Balance fetched successfully",
+        data: balance,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
         message: "Internal server error",
       });
     }

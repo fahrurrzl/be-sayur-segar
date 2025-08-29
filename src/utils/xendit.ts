@@ -7,3 +7,4 @@ const x = new Xendit({
 
 export const Invoice = x.Invoice;
 export const Payout = x.Payout;
+export const Balance = x.Balance;

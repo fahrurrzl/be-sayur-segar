@@ -109,6 +109,11 @@ router.put("/order/delivered/:id", authMiddleware, orderController.isDelivered);
 router.put("/order/completed/:id", authMiddleware, orderController.isCompleted);
 // Wallet
 router.post("/wallet", authMiddleware, walletController.create);
+router.get(
+  "/wallet/balance",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  walletController.index
+);
 
 // Wallet Transaction
 router.get(
