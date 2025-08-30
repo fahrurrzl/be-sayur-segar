@@ -21,12 +21,13 @@ import env from "../utils/env";
 
 export default {
   async register(req: Request, res: Response) {
-    const { name, email, address, phone, password, confirmPassword } =
+    const { name, username, email, address, phone, password, confirmPassword } =
       req.body as unknown as TRegister;
 
     try {
       const validated = registerSchema.parse({
         name,
+        username,
         email,
         address,
         phone,
@@ -36,7 +37,14 @@ export default {
 
       const userExists = await prisma.user.findFirst({
         where: {
-          email: validated.email,
+          OR: [
+            {
+              email: validated.email,
+            },
+            {
+              username: validated.username,
+            },
+          ],
         },
       });
 
@@ -52,6 +60,7 @@ export default {
       const user = await prisma.user.create({
         data: {
           name: validated.name,
+          username: validated.username,
           email: validated.email,
           phone: validated.phone,
           password: hashedPassword,
@@ -169,6 +178,7 @@ export default {
             select: {
               id: true,
               storeName: true,
+              storePhoto: true,
               storeLocation: true,
               verified: true,
               bankName: true,
@@ -201,15 +211,20 @@ export default {
     }
   },
   async update(req: IReqUser, res: Response) {
-    const { name, email, phone, address } = req.body as unknown as TUpdate;
+    const { name, email, phone, address, username, gender, birthDate, photo } =
+      req.body as unknown as TUpdate;
     const user = req?.user;
 
     try {
       const validated = updateSchema.parse({
         name,
+        username,
         email,
         phone,
         address,
+        gender,
+        birthDate,
+        photo,
       });
 
       const userExists = await prisma.user.findUnique({
@@ -230,9 +245,13 @@ export default {
         },
         data: {
           name: validated.name,
+          username: validated.username,
           email: validated.email,
           phone: validated.phone,
           address: validated.address,
+          gender: validated.gender,
+          birthDate: validated.birthDate,
+          photo: validated.photo,
         },
       });
 

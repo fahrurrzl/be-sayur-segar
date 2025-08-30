@@ -13,6 +13,7 @@ import walletController from "../controller/wallet.controller";
 import walletTransactionController from "../controller/wallet-transaction.controller";
 import transferController from "../controller/transfer.controller";
 import { sendMail } from "../utils/mail/mail";
+import unitController from "../controller/unit.controller";
 const router = express.Router();
 
 // Auth
@@ -149,5 +150,24 @@ router.post(
   transferController.create
 );
 router.post("/transfer/webhook", transferController.payoutWebhook);
+
+// Unit
+router.post(
+  "/unit",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  unitController.create
+);
+router.get("/unit", unitController.index);
+router.put(
+  "/unit/:id",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  unitController.update
+);
+router.delete(
+  "/unit/:id",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  unitController.destroy
+);
+router.get("/unit/:id", unitController.show);
 
 export default router;

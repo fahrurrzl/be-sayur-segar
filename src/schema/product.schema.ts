@@ -7,4 +7,5 @@ export const productSchema = z.object({
   stock: z.number().min(1).nonnegative(),
   imageUrl: z.string().nonempty(),
   categoryId: z.string().nonempty({ message: "Please input category" }),
+  unitId: z.string().nonempty({ message: "Please input unit" }),
 });

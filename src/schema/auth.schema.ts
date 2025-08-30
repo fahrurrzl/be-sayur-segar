@@ -3,6 +3,9 @@ import { z } from "zod";
 export const registerSchema = z
   .object({
     name: z.string().min(3, { message: "Name must be at least 3 characters" }),
+    username: z
+      .string()
+      .min(3, { message: "Username must be at least 3 characters" }),
     email: z.string().email({ message: "Invalid email address" }),
     phone: z
       .string()
@@ -27,6 +30,12 @@ export const loginSchema = z.object({
 
 export const updateSchema = z.object({
   name: z.string().min(3, { message: "Name must be at least 3 characters" }),
+  username: z
+    .string()
+    .min(3, { message: "Username must be at least 3 characters" }),
+  gender: z.enum(["male", "female"]),
+  birthDate: z.string(),
+  photo: z.string().optional(),
   email: z.string().email({ message: "Invalid email address" }),
   phone: z
     .string()

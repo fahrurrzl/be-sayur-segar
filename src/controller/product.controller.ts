@@ -8,7 +8,7 @@ import { z } from "zod";
 export default {
   async create(req: IReqUser, res: Response) {
     const user = req.user;
-    const { name, description, price, stock, imageUrl, categoryId } =
+    const { name, description, price, stock, imageUrl, categoryId, unitId } =
       req.body as unknown as TProduct;
 
     try {
@@ -19,6 +19,7 @@ export default {
         stock,
         imageUrl,
         categoryId,
+        unitId,
       });
 
       const seller = await prisma.seller.findFirst({
@@ -50,6 +51,7 @@ export default {
           stock: validated.stock,
           imageUrl: validated.imageUrl,
           categoryId: validated.categoryId,
+          unitId: validated.unitId,
         },
       });
 
@@ -95,6 +97,7 @@ export default {
             },
           },
           category: true,
+          Unit: true,
         },
         orderBy: {
           createdAt: "desc",
@@ -128,6 +131,8 @@ export default {
               userId: true,
             },
           },
+          category: true,
+          Unit: true,
         },
       });
 
@@ -146,6 +151,11 @@ export default {
       });
     } catch (error) {
       console.log(error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: error.issues[0].message,
+        });
+      }
       return res.status(500).json({
         message: "Internal server error",
       });
@@ -154,7 +164,7 @@ export default {
   async update(req: IReqUser, res: Response) {
     const user = req.user;
     const { id } = req.params;
-    const { name, description, price, stock, imageUrl, categoryId } =
+    const { name, description, price, stock, imageUrl, categoryId, unitId } =
       req.body as unknown as TProduct;
 
     try {
@@ -165,6 +175,7 @@ export default {
         stock,
         imageUrl,
         categoryId,
+        unitId,
       });
 
       const seller = await prisma.seller.findFirst({
@@ -211,6 +222,7 @@ export default {
           stock: validated.stock,
           imageUrl: validated.imageUrl,
           categoryId: validated.categoryId,
+          unitId: validated.unitId,
         },
       });
 

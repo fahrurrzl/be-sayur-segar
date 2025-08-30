@@ -17,22 +17,31 @@ enum RoleUser {
   superadmin
 }
 
+enum Gender {
+  male
+  female
+}
+
 model User {
-  id              String     @id @default(uuid())
-  name            String     @db.VarChar(255)
-  email           String     @unique
-  phone           String     @db.VarChar(15)
-  password        String
-  role            RoleUser   @default(user)
-  address         String
-  isActive        Boolean    @default(false)
-  activationCode  String     @unique @map("activation_code")
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  Category        Category[]
-  Seller          Seller[]
-  Cart            Cart[]
-  Order           Order[]
+  id             String     @id @default(uuid())
+  name           String     @db.VarChar(255)
+  username       String     @unique
+  gender         Gender?
+  birthDate      DateTime?  @map("birth_date")
+  photo          String?
+  email          String     @unique
+  phone          String     @db.VarChar(15)
+  password       String
+  role           RoleUser   @default(user)
+  address        String
+  isActive       Boolean    @default(false) @map("is_active")
+  activationCode String     @unique @map("activation_code")
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  Category       Category[]
+  Seller         Seller[]
+  Cart           Cart[]
+  Order          Order[]
 }
 
 model Seller {
@@ -40,11 +49,12 @@ model Seller {
   userId        String    @map("user_id")
   storeName     String    @map("store_name") @db.VarChar(255)
   storeLocation String    @map("store_location") @db.VarChar(255)
+  storePhoto    String?   @map("store_photo")
   verified      Boolean   @default(false)
   description   String    @db.Text
-  bankName      String
-  accountName   String
-  accountNumber String
+  bankName      String    @map("bank_name")
+  accountName   String    @map("account_name")
+  accountNumber String    @map("account_number")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   products      Product[]
@@ -75,15 +85,15 @@ enum WalletTransactionType {
 }
 
 model WalletTransaction {
-  id            String   @id @default(uuid())
+  id            String                  @id @default(uuid())
   walletId      String
   amount        Float
   type          WalletTransactionType
   status        WalletTransactionStatus
   paymentMethod String
-  orderId       String?  @map("order_id")
-  createdAt     DateTime @default(now())
-  wallet        Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  orderId       String?                 @map("order_id")
+  createdAt     DateTime                @default(now())
+  wallet        Wallet                  @relation(fields: [walletId], references: [id], onDelete: Cascade)
 }
 
 model Category {
@@ -106,12 +116,23 @@ model Product {
   stock       Int
   imageUrl    String
   categoryId  String      @map("category_id")
+  unitId      String      @map("unit_id")
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   seller      Seller?     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   cartItems   CartItem[]
   OrderItem   OrderItem[]
+  Unit        Unit        @relation(fields: [unitId], references: [id])
+}
+
+model Unit {
+  id        String    @id @default(uuid())
+  name      String    @db.VarChar(255)
+  symbol    String
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Cart {

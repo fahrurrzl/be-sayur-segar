@@ -18,6 +18,10 @@ interface IReqUser extends Request {
 
 export type TUpdate = {
   name: string;
+  username: string;
+  gender: string;
+  birthDate: string;
+  photo?: string;
   email: string;
   phone: string;
   address: string;
