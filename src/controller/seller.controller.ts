@@ -76,7 +76,12 @@ export default {
     try {
       const sellers = await prisma.seller.findMany({
         include: {
-          products: true,
+          products: {
+            include: {
+              Unit: true,
+              category: true,
+            },
+          },
           user: true,
         },
         orderBy: {
@@ -103,7 +108,12 @@ export default {
           id,
         },
         include: {
-          products: true,
+          products: {
+            include: {
+              Unit: true,
+              category: true,
+            },
+          },
           user: true,
         },
       });
@@ -137,6 +147,7 @@ export default {
           products: {
             include: {
               category: true,
+              Unit: true,
             },
             orderBy: {
               updatedAt: "desc",

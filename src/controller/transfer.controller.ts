@@ -43,7 +43,7 @@ export default {
     const event = req.body;
 
     try {
-      const referenceId = event?.data.reference_id;
+      const referenceId = event?.data?.reference_id;
 
       // TODO: update database sesuai referenceId
       await prisma.walletTransaction.update({
