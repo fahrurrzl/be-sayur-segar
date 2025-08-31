@@ -2,11 +2,12 @@ import express from "express";
 import router from "./routes/api";
 import bodyParser from "body-parser";
 import cors from "cors";
+import env from "./utils/env";
 const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: env.FRONTEND_URL,
     credentials: true,
   })
 );
@@ -23,5 +24,5 @@ router.get("/", (req, res) => {
 app.use("/api", router);
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on ${env.FRONTEND_URL}:${PORT ? PORT : null}`);
 });
