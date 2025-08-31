@@ -84,6 +84,7 @@ export default {
             ? {
                 name: {
                   contains: search as string,
+                  mode: "insensitive",
                 },
               }
             : {}),
