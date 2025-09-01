@@ -221,6 +221,7 @@ export default {
   },
   // Get Seller Order
   async sellerIndex(req: IReqUser, res: Response) {
+    const { limit, page, search } = req.query;
     const user = req.user;
 
     try {
@@ -237,7 +238,29 @@ export default {
       const orders = await prisma.order.findMany({
         where: {
           sellerId: seller?.id,
+          ...(search
+            ? {
+                OR: [
+                  {
+                    orderId: {
+                      contains: search as string,
+                      mode: "insensitive",
+                    },
+                  },
+                  {
+                    user: {
+                      name: {
+                        contains: search as string,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                ],
+              }
+            : {}),
         },
+        take: Number(limit),
+        skip: (Number(page) - 1) * Number(limit),
         include: {
           items: true,
           user: true,
@@ -247,9 +270,40 @@ export default {
         },
       });
 
+      const total = await prisma.order.count({
+        where: {
+          sellerId: seller?.id,
+          ...(search
+            ? {
+                OR: [
+                  {
+                    orderId: {
+                      contains: search as string,
+                      mode: "insensitive",
+                    },
+                  },
+                  {
+                    user: {
+                      name: {
+                        contains: search as string,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                ],
+              }
+            : {}),
+        },
+      });
+
       res.status(200).json({
         message: "Orders fetched successfully",
-        data: orders,
+        data: {
+          orders,
+          totalPage: Math.ceil(total / Number(limit)),
+          currentPage: Number(page),
+          total,
+        },
       });
     } catch (error) {
       console.log("error => ", error);
@@ -260,13 +314,36 @@ export default {
   },
   // Get User Order
   async userIndex(req: IReqUser, res: Response) {
+    const { limit, page, search } = req.query;
     const user = req.user;
 
     try {
       const orders = await prisma.order.findMany({
         where: {
           userId: user?.id,
+          ...(search
+            ? {
+                OR: [
+                  {
+                    orderId: {
+                      contains: search as string,
+                      mode: "insensitive",
+                    },
+                  },
+                  {
+                    seller: {
+                      storeName: {
+                        contains: search as string,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                ],
+              }
+            : {}),
         },
+        take: Number(limit),
+        skip: (Number(page) - 1) * Number(limit),
         include: {
           items: true,
           seller: true,
@@ -276,9 +353,40 @@ export default {
         },
       });
 
+      const total = await prisma.order.count({
+        where: {
+          userId: user?.id,
+          ...(search
+            ? {
+                OR: [
+                  {
+                    orderId: {
+                      contains: search as string,
+                      mode: "insensitive",
+                    },
+                  },
+                  {
+                    user: {
+                      name: {
+                        contains: search as string,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                ],
+              }
+            : {}),
+        },
+      });
+
       res.status(200).json({
         message: "Orders fetched successfully",
-        data: orders,
+        data: {
+          orders,
+          totalPage: Math.ceil(total / Number(limit)),
+          currentPage: Number(page),
+          total,
+        },
       });
     } catch (error) {
       console.log("error => ", error);

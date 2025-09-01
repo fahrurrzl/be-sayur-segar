@@ -76,7 +76,7 @@ export default {
     }
   },
   async index(req: IReqUser, res: Response) {
-    const { search, category } = req.query;
+    const { search, category, page, limit } = req.query;
     try {
       const products = await prisma.product.findMany({
         where: {
@@ -103,11 +103,32 @@ export default {
         orderBy: {
           createdAt: "desc",
         },
+        take: Number(limit),
+        skip: (Number(page) - 1) * Number(limit),
+      });
+
+      const total = await prisma.product.count({
+        where: {
+          ...(search
+            ? {
+                name: {
+                  contains: search as string,
+                  mode: "insensitive",
+                },
+              }
+            : {}),
+          ...(category ? { categoryId: category as string } : {}),
+        },
       });
 
       res.status(200).json({
         message: "Products fetched successfully",
-        data: products,
+        data: {
+          products,
+          totalPage: Math.ceil(total / Number(limit)),
+          currentPage: Number(page),
+          total,
+        },
       });
     } catch (error) {
       console.log(error);
@@ -329,6 +350,36 @@ export default {
           ...deletedProduct,
           price: Number(deletedProduct.price),
         },
+      });
+    } catch (error) {
+      console.log("error => ", error);
+      return res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  },
+  async getFeatured(req: IReqUser, res: Response) {
+    try {
+      const products = await prisma.product.findMany({
+        include: {
+          seller: {
+            select: {
+              storeName: true,
+              storeLocation: true,
+            },
+          },
+          category: true,
+          Unit: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 8,
+      });
+
+      res.status(200).json({
+        message: "Products fetched successfully",
+        data: products,
       });
     } catch (error) {
       console.log("error => ", error);

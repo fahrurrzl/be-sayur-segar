@@ -136,6 +136,7 @@ export default {
     }
   },
   async me(req: IReqUser, res: Response) {
+    const { limit, page, search } = req.query;
     const user = req.user;
 
     try {
@@ -145,6 +146,14 @@ export default {
         },
         include: {
           products: {
+            where: {
+              name: {
+                contains: search as string,
+                mode: "insensitive",
+              },
+            },
+            take: Number(limit),
+            skip: (Number(page) - 1) * Number(limit),
             include: {
               category: true,
               Unit: true,
@@ -171,9 +180,20 @@ export default {
         });
       }
 
+      const total = await prisma.product.count({
+        where: {
+          sellerId: seller.id,
+        },
+      });
+
       res.status(200).json({
         message: "Seller fetched successfully",
-        data: seller,
+        data: {
+          seller,
+          totalPage: Math.ceil(total / Number(limit)),
+          currentPage: Number(page),
+          total,
+        },
       });
     } catch (error) {
       res.status(500).json({

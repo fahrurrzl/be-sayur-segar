@@ -50,6 +50,7 @@ router.put(
 // Product
 router.post("/product", authMiddleware, productController.create);
 router.get("/product", productController.index);
+router.get("/product/featured", productController.getFeatured);
 router.get("/product/:id", productController.show);
 router.put("/product/:id", authMiddleware, productController.update);
 router.delete("/product/:id", authMiddleware, productController.delete);
