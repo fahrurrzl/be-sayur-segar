@@ -65,6 +65,7 @@ export default {
     }
   },
   async superAdminIndex(req: IReqUser, res: Response) {
+    const { search, page, limit } = req.query;
     try {
       const walletTransaction = await prisma.walletTransaction.findMany({
         orderBy: {
@@ -86,6 +87,36 @@ export default {
             },
           },
         },
+        ...(search
+          ? {
+              where: {
+                OR: [
+                  {
+                    wallet: {
+                      seller: {
+                        storeName: {
+                          contains: search as string,
+                          mode: "insensitive",
+                        },
+                      },
+                    },
+                  },
+                  {
+                    wallet: {
+                      seller: {
+                        bankName: {
+                          contains: search as string,
+                          mode: "insensitive",
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            }
+          : null),
+        take: Number(limit),
+        skip: (Number(page) - 1) * Number(limit),
       });
 
       if (!walletTransaction) {
@@ -94,9 +125,45 @@ export default {
           .json({ message: "wallet transaction not found" });
       }
 
+      const total = await prisma.walletTransaction.count({
+        ...(search
+          ? {
+              where: {
+                OR: [
+                  {
+                    wallet: {
+                      seller: {
+                        storeName: {
+                          contains: search as string,
+                          mode: "insensitive",
+                        },
+                      },
+                    },
+                  },
+                  {
+                    wallet: {
+                      seller: {
+                        bankName: {
+                          contains: search as string,
+                          mode: "insensitive",
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            }
+          : null),
+      });
+
       res.status(200).json({
         message: "success get all wallet transaction",
-        data: walletTransaction,
+        data: {
+          walletTransaction,
+          totalPage: Math.ceil(total / Number(limit)),
+          currentPage: Number(page),
+          total,
+        },
       });
     } catch (error) {
       console.log(error);

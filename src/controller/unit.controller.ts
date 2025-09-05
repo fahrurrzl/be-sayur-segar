@@ -51,10 +51,21 @@ export default {
     }
   },
   async index(req: IReqUser, res: Response) {
+    const { search } = req.query;
     try {
       const units = await prisma.unit.findMany({
         orderBy: {
           createdAt: "desc",
+        },
+        where: {
+          ...(search
+            ? {
+                name: {
+                  contains: search as string,
+                  mode: "insensitive",
+                },
+              }
+            : {}),
         },
       });
       res.status(200).json({

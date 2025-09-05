@@ -73,6 +73,7 @@ export default {
     }
   },
   async index(req: IReqUser, res: Response) {
+    const { search, page, limit } = req.query;
     try {
       const sellers = await prisma.seller.findMany({
         include: {
@@ -87,10 +88,77 @@ export default {
         orderBy: {
           createdAt: "desc",
         },
+        ...(search
+          ? {
+              where: {
+                OR: [
+                  {
+                    storeName: {
+                      contains: search as string,
+                      mode: "insensitive",
+                    },
+                  },
+                  {
+                    user: {
+                      name: {
+                        contains: search as string,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                  {
+                    storeLocation: {
+                      contains: search as string,
+                      mode: "insensitive",
+                    },
+                  },
+                ],
+              },
+            }
+          : {}),
+        ...(limit ? { take: Number(limit) } : {}),
+        ...(page ? { skip: (Number(page) - 1) * Number(limit) } : {}),
       });
+
+      const total = await prisma.seller.count({
+        ...(search
+          ? {
+              where: {
+                OR: [
+                  {
+                    storeName: {
+                      contains: search as string,
+                      mode: "insensitive",
+                    },
+                  },
+                  {
+                    user: {
+                      name: {
+                        contains: search as string,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                  {
+                    storeLocation: {
+                      contains: search as string,
+                      mode: "insensitive",
+                    },
+                  },
+                ],
+              },
+            }
+          : {}),
+      });
+
       res.status(200).json({
         message: "Sellers fetched successfully",
-        data: sellers,
+        data: {
+          sellers,
+          totalPage: Math.ceil(total / Number(limit)),
+          currentPage: Number(page),
+          total,
+        },
       });
     } catch (error) {
       res.status(500).json({
