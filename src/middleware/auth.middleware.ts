@@ -2,38 +2,32 @@ import { NextFunction, Request, Response } from "express";
 import { getUser } from "../utils/jwt";
 import { IReqUser } from "../types/auth";
 
-export default function (req: Request, res: Response, next: NextFunction) {
-  const authorization = req.headers.authorization;
+export default function authMiddleware(req: Request, res: Response, next: NextFunction) {
+    const authorization = req.headers.authorization;
 
-  if (!authorization) {
-    return res.status(401).json({
-      message: "Unauthorization",
-    });
-  }
-
-  const [prefix, token] = authorization.split(" ");
-
-  if (!(prefix === "Bearer" && token)) {
-    return res.status(401).json({
-      message: "Unauthorization",
-    });
-  }
-
-  try {
-    const user = getUser(token);
-
-    if (!user) {
-      return res.status(401).json({
-        message: "Unauthorization",
-      });
+    if (!authorization) {
+        return res.status(401).json({ message: "Unauthorized: No token provided" });
     }
 
-    (req as IReqUser).user = user;
+    const [prefix, token] = authorization.split(" ");
 
-    next();
-  } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-    });
-  }
+    if (prefix !== "Bearer" || !token) {
+        return res.status(401).json({ message: "Unauthorized: Invalid token format" });
+    }
+
+    try {
+        const user = getUser(token);
+
+        if (!user) {
+            return res.status(401).json({ message: "Unauthorized: Invalid token" });
+        }
+
+        (req as IReqUser).user = user;
+        next();
+    } catch (error: any) {
+        if (error.name === "TokenExpiredError") {
+            return res.status(401).json({ message: "Unauthorized: Token expired" });
+        }
+        return res.status(401).json({ message: "Unauthorized: Invalid token" });
+    }
 }

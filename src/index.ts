@@ -24,5 +24,5 @@ router.get("/", (req, res) => {
 app.use("/api", router);
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT ? PORT : null}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });

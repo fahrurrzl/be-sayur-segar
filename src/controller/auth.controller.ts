@@ -84,12 +84,11 @@ export default {
         html: contentMail as string,
       });
 
+      delete (user as any).password;
+
       return res.status(201).json({
         message: "User created successfully",
-        data: {
-          ...user,
-          password: undefined,
-        },
+        data: user,
       });
     } catch (error) {
       console.log(error);
@@ -255,12 +254,11 @@ export default {
         },
       });
 
+      delete (updatedUser as any).password;
+
       return res.status(200).json({
         message: "User updated successfully",
-        data: {
-          ...updatedUser,
-          password: undefined,
-        },
+        data: updatedUser,
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
