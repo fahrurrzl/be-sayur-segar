@@ -22,6 +22,7 @@ router.post("/auth/login", authController.login);
 router.post("/auth/login-admin", authController.loginAdmin);
 router.get("/auth/me", authMiddleware, authController.me);
 router.put("/auth/update", authMiddleware, authController.update);
+router.put("/auth/update-photo", authMiddleware, authController.updatePhoto);
 router.put(
   "/auth/change-password",
   authMiddleware,

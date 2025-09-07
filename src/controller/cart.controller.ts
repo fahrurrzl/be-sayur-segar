@@ -99,6 +99,9 @@ export default {
             select: { items: true },
           },
           items: {
+            orderBy: {
+              createdAt: "desc",
+            },
             include: {
               product: {
                 select: {

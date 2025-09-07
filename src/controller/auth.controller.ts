@@ -18,6 +18,7 @@ import { z } from "zod";
 import { generateToken } from "../utils/jwt";
 import { renderMailHtml, sendMail } from "../utils/mail/mail";
 import env from "../utils/env";
+import { deleteImage } from "../utils/cloudinary";
 
 export default {
   async register(req: Request, res: Response) {
@@ -410,6 +411,43 @@ export default {
 
       return res.status(200).json({
         message: "User activated successfully",
+        data: {
+          ...user,
+          password: undefined,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  },
+  async updatePhoto(req: IReqUser, res: Response) {
+    const { photo } = req.body as { photo: string };
+
+    try {
+      const oldUser = await prisma.user.findUnique({
+        where: {
+          id: req.user?.id,
+        },
+      });
+
+      if (oldUser?.photo) {
+        await deleteImage(oldUser?.photo);
+      }
+
+      const user = await prisma.user.update({
+        where: {
+          id: req.user?.id,
+        },
+        data: {
+          photo,
+        },
+      });
+
+      return res.status(200).json({
+        message: "User photo updated successfully",
         data: {
           ...user,
           password: undefined,
