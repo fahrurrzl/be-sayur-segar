@@ -124,11 +124,6 @@ export default {
           invoiceId: invoice.id,
           paymentUrl: invoice.invoiceUrl,
         },
-        // data: orders.map((o) => ({
-        //   ...o,
-        //   invoiceId: invoice.id,
-        //   paymentUrl: invoice.invoiceUrl,
-        // })),
       });
     } catch (error) {
       console.log(error);
