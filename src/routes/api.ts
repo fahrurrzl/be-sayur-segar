@@ -12,8 +12,8 @@ import orderController from "../controller/order.controller";
 import walletController from "../controller/wallet.controller";
 import walletTransactionController from "../controller/wallet-transaction.controller";
 import transferController from "../controller/transfer.controller";
-import { sendMail } from "../utils/mail/mail";
 import unitController from "../controller/unit.controller";
+import userController from "../controller/user.controller";
 const router = express.Router();
 
 // Auth
@@ -29,6 +29,14 @@ router.put(
   authController.changePassword
 );
 router.post("/auth/activation", authController.activation);
+
+// User
+router.get(
+  "/users",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  userController.index
+);
+router.get("/users/:id", userController.show);
 
 // Seller
 router.post("/seller", authMiddleware, sellerController.create);
