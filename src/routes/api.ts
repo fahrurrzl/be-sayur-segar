@@ -37,6 +37,11 @@ router.get(
   userController.index
 );
 router.get("/users/:id", userController.show);
+router.delete(
+  "/users/:id",
+  [authMiddleware, roleMiddleware(["superadmin"])],
+  userController.destroy
+);
 
 // Seller
 router.post("/seller", authMiddleware, sellerController.create);

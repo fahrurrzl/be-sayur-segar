@@ -80,4 +80,37 @@ export default {
       });
     }
   },
+  async destroy(req: IReqUser, res: Response) {
+    const { id } = req.params;
+
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          id,
+        },
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+
+      await prisma.user.delete({
+        where: {
+          id,
+        },
+      });
+
+      res.status(200).json({
+        message: "User deleted successfully",
+        data: user,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  },
 };
